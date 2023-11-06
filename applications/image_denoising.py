@@ -161,9 +161,8 @@ def save_full_model(model, path_model):
     torch.save(model, path_model)
 
 
-def save_onnx_model(model, path_model, device, image_size=(100, 100)):
+def save_onnx_model(model, path_model, inp):
     with torch.no_grad():
-        inp = torch.randn((1, 3, image_size[0], image_size[1]), device=device)
 
         torch.onnx.export(model,
                           (inp,),
@@ -180,7 +179,7 @@ def save_onnx_model(model, path_model, device, image_size=(100, 100)):
 def save_results(model, device, directory, rainy_loader, normal_loader, prefix, limit, nrow=5, op_count=1):
 
     assert op_count > 0 # кол-во раз обработки изображения моделью
-
+    torch.set_printoptions(threshold=10000)
     with torch.no_grad():
       i = 0
       for data_noisy, data_normal in zip(rainy_loader, normal_loader):
@@ -191,6 +190,9 @@ def save_results(model, device, directory, rainy_loader, normal_loader, prefix, 
             images_normal = images_normal.to(device)
 
             outputs = model(images_noisy)
+
+
+
             for j in range(op_count):
                 res_cat = torch.cat((images_noisy, outputs, images_normal))
 
@@ -200,6 +202,10 @@ def save_results(model, device, directory, rainy_loader, normal_loader, prefix, 
                 if not os.path.exists(directory):
                   os.makedirs(directory)
                 save_image(img, os.path.join(directory, f"{prefix}_res{i}_op_count({j + 1}).png"))
+
+                with open(os.path.join(directory, f"{prefix}_res{i}_op_count({j + 1}).txt"), "w") as file_write:
+                    print((images_normal - outputs) * 50., file=file_write)
+
                 if op_count > 1:
                   outputs = model(outputs)
 
