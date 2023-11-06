@@ -12,6 +12,51 @@ from .functions import read_tensor
 
 class SimpleLoader2d(Dataset):
 
+    def __init__(self, data_dir, device, batch_size, width, height, transform=None):
+
+        self.width = width
+        self.height = height
+
+        if transform is None:
+            transform = transforms.Compose([
+                transforms.ToTensor(),
+            ])
+
+        self.all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f))]
+        self.data = []
+
+        self.count_batches = len(self.all_files) // batch_size
+
+        for i in range(self.count_batches):
+
+            batch = []
+            for _ in range(batch_size):
+
+                batch.append(self.all_files.pop())
+
+            self.data.append(batch)
+
+
+        self.transform = transform
+
+        self.batch_size = batch_size
+
+        self.device = device
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        content = list(map(read_tensor, self.data[idx]))
+
+        batch = torch.tensor(np.array(list(map(lambda el: np.array(el),
+                         content))), dtype=torch.float, device=self.device).resize(32, 1, self.width, self.height)
+
+        return batch, True
+
+
+class SimplePairLoader2d(Dataset):
+
     def __init__(self, data_dir, device, batch_size, transform=None):
 
         if transform is None:
