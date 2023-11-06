@@ -96,7 +96,9 @@ def train(model, train_noisy_loader, train_normal_loader, test_noisy_loader, tes
         optimizer = get_optimizer(model)
 
     loss_values = []
+    test_loss_values = []
     for epoch in range(n_epochs):
+
         # monitor training loss
         train_loss = 0.0
         test_loss = 0.0
@@ -150,11 +152,13 @@ def train(model, train_noisy_loader, train_normal_loader, test_noisy_loader, tes
                 print(f"Model saved successfully at {path_save}.")
 
         loss_values.append(train_loss)
+        test_loss_values.append(test_loss)
 
         for cb in callbacks:
             cb()
 
         print("\n", "=" * 100, "\n", sep="")
+    return loss_values, test_loss_values
 
 
 def save_full_model(model, path_model):

@@ -8,6 +8,7 @@ from torchvision import transforms, utils, datasets, models
 import numpy as np
 
 from .functions import read_tensor
+from random import shuffle
 
 
 class SimpleLoader2d(Dataset):
@@ -23,6 +24,7 @@ class SimpleLoader2d(Dataset):
             ])
 
         self.all_files = [os.path.join(data_dir, f) for f in os.listdir(data_dir) if os.path.isfile(os.path.join(data_dir, f))]
+        #shuffle(self.all_files)
         self.data = []
 
         self.count_batches = len(self.all_files) // batch_size
@@ -43,6 +45,9 @@ class SimpleLoader2d(Dataset):
 
         self.device = device
 
+    def shuffle(self):
+        shuffle(self.data)
+
     def __len__(self):
         return len(self.data)
 
@@ -50,7 +55,7 @@ class SimpleLoader2d(Dataset):
         content = list(map(read_tensor, self.data[idx]))
 
         batch = torch.tensor(np.array(list(map(lambda el: np.array(el),
-                         content))), dtype=torch.float, device=self.device).resize(32, 1, self.width, self.height)
+                         content))), dtype=torch.float, device=self.device).resize(self.batch_size, 1, self.width, self.height)
 
         return batch, True
 
