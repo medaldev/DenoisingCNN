@@ -7,16 +7,17 @@ from torchvision import transforms, utils, datasets, models
 
 import numpy as np
 
-from .functions import read_tensor
 from random import shuffle
 
 
 class SimpleLoader2d(Dataset):
 
-    def __init__(self, data_dir, device, batch_size, width, height, transform=None):
+    def __init__(self, data_dir, device, batch_size, width, height, read_tensor, transform=None):
 
         self.width = width
         self.height = height
+
+        self.read_tensor = read_tensor
 
         if transform is None:
             transform = transforms.Compose([
@@ -52,7 +53,7 @@ class SimpleLoader2d(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        content = list(map(read_tensor, self.data[idx]))
+        content = list(map(self.read_tensor, self.data[idx]))
 
         batch = torch.tensor(np.array(list(map(lambda el: np.array(el),
                          content))), dtype=torch.float, device=self.device).resize(self.batch_size, 1, self.width, self.height)
