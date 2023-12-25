@@ -1,4 +1,4 @@
-from datagenerators.components.figure import Figure
+from datageneration.components.figure import Figure
 
 
 class Circle(Figure):

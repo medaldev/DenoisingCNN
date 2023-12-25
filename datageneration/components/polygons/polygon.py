@@ -1,7 +1,8 @@
 import math, random
 from typing import List, Tuple
 
-from datagenerators.components.figure import Figure
+from datageneration.components.figure import Figure
+from polygenerator import random_polygon
 
 
 def generate_polygon(center: Tuple[float, float], avg_radius: float,

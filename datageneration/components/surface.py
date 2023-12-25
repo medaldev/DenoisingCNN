@@ -2,7 +2,7 @@ import random
 
 import numpy as np
 
-from datagenerators.components.figure import Figure
+from datageneration.components.figure import Figure
 
 
 class Surface:
