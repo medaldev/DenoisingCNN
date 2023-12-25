@@ -6,6 +6,13 @@ def rescale_array(a, to=(0, +1)):
     return np.interp(a, (a.min(), a.max()), to)
 
 
+def read_tensor_and_norm(path, norm_coeff):
+    with open(path, "r", encoding="utf8") as file_matrix:
+        matrix = np.array(list(map(lambda row: list(map(lambda el: float(el) / norm_coeff, row.split())),
+                                   file_matrix.read().strip().split("\n"))))
+    return matrix
+
+
 def add_noise(matrix: np.ndarray, cell_size) -> np.ndarray:
     height, width = matrix.shape
     for I in range(0, height, cell_size):
