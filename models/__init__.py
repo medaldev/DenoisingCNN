@@ -1,1 +1,1 @@
-from .ConvAutoEncoder import ConvAutoencoder, ConvAutoencoderLuma
+from models.autoencoders.ConvAutoEncoder import ConvAutoencoder, ConvAutoencoderLuma
