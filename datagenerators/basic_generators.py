@@ -5,63 +5,9 @@ from datagenerators.components.polygon import generate_polygon
 from polygenerator import random_polygon
 import random
 from datetime import datetime
-from PIL import Image
 import os
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def renormalize(n, from_range, to_range):
-    delta1 = from_range[1] - from_range[0]
-    delta2 = to_range[1] - to_range[0]
-    return (delta2 * (n - from_range[0]) / delta1) + to_range[0]
-
-
-def rescale_val(val, min, max):
-  return (val - min) / (max - min)
-
-def arrayToImage(matrix: np.ndarray, save_path="./res.png"):
-    im = Image.fromarray(matrix).convert("RGB")
-    im.save(save_path)
-
-
-def array_save(matrix: np.ndarray, save_path: str):
-    h, w = matrix.shape
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
-    with open(save_path, "w", encoding="utf8") as file:
-        for i in range(h):
-            for j in range(w):
-                print(matrix[i][j], file=file, end=" ")
-            print(file=file)
-
-
-def arrayToCsv(matrix: np.ndarray, save_path: str):
-    h, w = matrix.shape
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
-    with open(save_path, "w", encoding="utf8") as csv_file:
-        for i in range(h):
-            for j in range(w):
-                print(rescale_val(i, 0, h), rescale_val(j, 0, w), matrix[i][j], file=csv_file, end=", ")
 
 
 def gen_data_polygons_1(width: int, height: int, cell_size: int, n_polygons: int):
@@ -111,12 +57,8 @@ def gen_data_polygons_3(width: int, height: int, cell_size: int, n_polygons: int
     return surface
 
 
-def rescale_array(a, to=(0, +1)):
-  return np.interp(a, (a.min(), a.max()), to)
-def read_matrix(path):
-    with open(path, "r", encoding="utf8") as file_matrix:
-        matrix = np.array(list(map(lambda row: list(map(lambda el: float(el) , row.split())), file_matrix.read().strip().split("\n"))))
-    return matrix
+
+
 
 def basic_test(save_path, width, height, cell_size, model_path, device='cpu', csv=True, txt=True, png=True):
     noised_dir = os.path.join(save_path, "txt", "noised")
