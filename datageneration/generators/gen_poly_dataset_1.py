@@ -4,16 +4,15 @@ from datageneration.components.polygons import gen_data_polygons_1
 from common.fstream import *
 from common.matrix import add_noise
 
-def generate_example(save_path, width, height, cell_size, csv=True, txt=True, png=True):
 
+def generate_example(save_path, width, height, cell_size, csv=True, txt=True, png=True):
     surface = gen_data_polygons_1(width, height, cell_size, 5)
-    #surface = gen_data_polygons_3(width, height, cell_size, 2, poly_radius=random.randint(4, 8))
+    # surface = gen_data_polygons_3(width, height, cell_size, 2, poly_radius=random.randint(4, 8))
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 2, figsize=(12, 8))
 
     arr = surface.matrix()
     if np.sum(arr) > 0:
-
 
         this_label = str(datetime.now())
         if csv:
@@ -27,10 +26,9 @@ def generate_example(save_path, width, height, cell_size, csv=True, txt=True, pn
         add_noise(arr, 2)
         # print_matrix(arr)
         if csv:
-            arrayToCsv(arr, os.path.join(save_path, "csv", "noised",  f"{this_label}.csv"))
+            arrayToCsv(arr, os.path.join(save_path, "csv", "noised", f"{this_label}.csv"))
         if txt:
             array_save(arr, os.path.join(save_path, "txt", "noised", f"{this_label}.xls"))
-
 
         if png:
             axes[1].imshow(arr)
