@@ -1,6 +1,8 @@
 import math, random
 from typing import List, Tuple
 
+from datagenerators.components.figure import Figure
+
 
 def generate_polygon(center: Tuple[float, float], avg_radius: float,
                      irregularity: float, spikiness: float,
@@ -88,3 +90,38 @@ def clip(value, lower, upper):
     edges.
     """
     return min(upper, max(value, lower))
+
+
+class Polygon(Figure):
+    def __init__(self, points: list[tuple[float, float]]):
+        self.points = points
+
+    def is_point_in_polygon(self, x: float, y: float) -> bool:
+        min_x = min_y = float('inf')
+        max_x = max_y = float('-inf')
+
+        for point in self.points:
+            min_x = min(point[0], min_x)
+            max_x = max(point[0], max_x)
+            min_y = min(point[1], min_y)
+            max_y = max(point[1], max_y)
+
+        if x < min_x or x > max_x or y < min_y or y > max_y:
+            return False
+
+        inside = False
+        j = len(self.points) - 1
+        for i in range(len(self.points)):
+            if ((self.points[i][1] > y) != (self.points[j][1] > y)) and \
+                    (x < (self.points[j][0] - self.points[i][0]) * (y - self.points[i][1]) / (
+                            self.points[j][1] - self.points[i][1]) +
+                     self.points[i][0]):
+                inside = not inside
+            j = i
+
+        return inside
+
+    def draw(self, x, y) -> float:
+        if self.is_point_in_polygon(x, y):
+            return 1.0
+        return 0.0
