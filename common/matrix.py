@@ -1,9 +1,17 @@
 import numpy as np
 import random
 
+import torch
+
 
 def rescale_array(a, to=(0, +1)):
     return np.interp(a, (a.min(), a.max()), to)
+
+
+def rescale_tensor(outmap):
+    outmap_min, _ = torch.min(outmap, dim=1, keepdim=True)
+    outmap_max, _ = torch.max(outmap, dim=1, keepdim=True)
+    return (outmap - outmap_min) / (outmap_max - outmap_min)  # Broadcasting rules apply
 
 
 def read_tensor_and_norm(path, norm_coeff):

@@ -3,6 +3,16 @@ from datetime import datetime
 from datageneration.components.polygons import gen_data_polygons_1
 from common.fstream import *
 from common.matrix import add_noise
+from datageneration.generators import AbstractGenerator
+
+
+class GenPolyDataset(AbstractGenerator):
+    def generate_dataset(self, name, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None, verbose=True):
+        print("Generating dataset...")
+        for i in range(n):
+            generate_example(f"../data/datasets/{name}", 100, 100, 2)
+            if verbose and i % 10 == 0:
+                print(f">> {i + 1} / {N}")
 
 
 def generate_example(save_path, width, height, cell_size, csv=True, txt=True, png=True):

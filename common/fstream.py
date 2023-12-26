@@ -1,12 +1,21 @@
 import numpy as np
 import os
 
+from common.matrix import rescale_array
 from common.value import rescale_val
 
 
 def read_matrix(path):
     with open(path, "r", encoding="utf8") as file_matrix:
-        matrix = np.array(list(map(lambda row: list(map(lambda el: float(el) , row.split())), file_matrix.read().strip().split("\n"))))
+        matrix = np.array(
+            list(map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n"))))
+    return matrix
+
+
+def read_tensor(path):
+    with open(path, "r", encoding="utf8") as file_matrix:
+        matrix = rescale_array(np.array(list(
+            map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n")))))
     return matrix
 
 
