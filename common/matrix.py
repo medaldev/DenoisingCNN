@@ -21,11 +21,12 @@ def read_tensor_and_norm(path, norm_coeff):
     return matrix
 
 
-def add_noise(matrix: np.ndarray, cell_size) -> np.ndarray:
+def add_noise(matrix: np.ndarray, cell_size, pct=0.1) -> np.ndarray:
     height, width = matrix.shape
+    noise_min, noise_max = 0.0, np.abs(np.max(matrix) - np.min(matrix)) * pct
     for I in range(0, height, cell_size):
         for J in range(0, width, cell_size):
-            noise = random.random()
+            noise = random.uniform(noise_min, noise_max)
             for i in range(I, I + cell_size):
                 for j in range(J, J + cell_size):
                     matrix[i][j] += noise

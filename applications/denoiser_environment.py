@@ -77,14 +77,14 @@ class DenoiserEnvironment:
         self.score_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
                                                   read_tensor=read_tensor)
 
-    def generate_data(self, name, data_goal, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None,
+    def generate_data(self, name, data_goal, n, width, height, cell_size, pct_noise, csv=True, txt=True, png=True, parameters=None,
                       verbose=True, generator_class=None):
         if generator_class:
             generator = generator_class()
         else:
             generator = datageneration.generators.get_basic_generator()
 
-        generator.generate_dataset(f"{name}/{data_goal}", n, width, height, cell_size, csv, txt, png, parameters,
+        generator.generate_dataset(f"{name}/{data_goal}", n, width, height, cell_size, pct_noise, csv, txt, png, parameters,
                                    verbose)
 
     def clear_metrics(self):
@@ -241,7 +241,7 @@ class DenoiserEnvironment:
 
         return scores_before, scores
 
-    def test_on_dataset(self, csv=True, txt=True, png=True):
+    def test_on_dataset(self, include_train=True, include_test=True, csv=True, txt=True, png=True):
         base_test_path = os.path.join(self.path_base, "runs", "tests", self.name_model,
                                       f"{self.name_dataset}", str(datetime.now()))
 
@@ -251,8 +251,11 @@ class DenoiserEnvironment:
         create_dir_if_not_exists(report_train_path)
         create_dir_if_not_exists(report_test_val_path)
 
-        basic_test(self.path_train, self.width, self.height, report_train_path, self.model, self.device, csv, txt, png)
-        basic_test(self.path_test, self.width, self.height, report_test_val_path, self.model, self.device, csv, txt,
+        if include_train:
+            basic_test(self.path_train, self.width, self.height, report_train_path, self.model, self.device, csv, txt, png)
+
+        if include_test:
+            basic_test(self.path_test, self.width, self.height, report_test_val_path, self.model, self.device, csv, txt,
                    png)
 
         print("Testing ended.")

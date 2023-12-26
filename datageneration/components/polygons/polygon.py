@@ -94,8 +94,9 @@ def clip(value, lower, upper):
 
 
 class Polygon(Figure):
-    def __init__(self, points: list[tuple[float, float]]):
+    def __init__(self, points: list[tuple[float, float]], k):
         self.points = points
+        self.k = k
 
     def is_point_in_polygon(self, x: float, y: float) -> bool:
         min_x = min_y = float('inf')
@@ -124,5 +125,6 @@ class Polygon(Figure):
 
     def draw(self, x, y) -> float:
         if self.is_point_in_polygon(x, y):
-            return 1.0
+            return self.k(x, y)
         return 0.0
+
