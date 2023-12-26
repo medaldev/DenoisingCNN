@@ -143,7 +143,7 @@ class DenoiserEnvironment:
     def show_single(self, concrete=None, op_count=1, figsize=(18, 8)):
         if concrete is None:
             concrete = random.randint(0, len(self.val_noisy_loader) - 1)
-        print(f"Show example {concrete}")
+        print(f"Show example №{concrete}")
         data_noisy, data_normal = self.val_noisy_loader[concrete], self.val_normal_loader[concrete]
         self.plot_batch(data_noisy, data_normal, op_count=op_count, figsize=figsize)
 
@@ -160,18 +160,21 @@ class DenoiserEnvironment:
         if png_save_path is not None:
             plt.ioff()
             plt.tight_layout()
-        fig, axes = plt.subplots(self.batch_size, 3 * op_count, figsize=figsize)
+        fig, axes = plt.subplots(self.batch_size, 2 + op_count, figsize=figsize)
+
+        for k in range(self.batch_size):
+            image_noisy = images_noisy[k].resize(self.width, self.height).tolist()
+            image_normal = images_normal[k].resize(self.width, self.height).tolist()
+
+            axes[k, 0].imshow(image_noisy)
+            axes[k, 1 + op_count].imshow(image_normal)
+
         for j in range(op_count):
             for k in range(self.batch_size):
-                image_noisy = images_noisy[k].resize(self.width, self.height).tolist()
-                image_normal = images_normal[k].resize(self.width, self.height).tolist()
                 image_out = outputs[k].resize(self.width, self.height).detach().tolist()
+                axes[k, 1 + j].imshow(image_out)
 
-                axes[k, j + 0].imshow(image_noisy)
-                axes[k, j + 1].imshow(image_out)
-                axes[k, j + 2].imshow(image_normal)
-
-            if op_count > 1:
+            if j + 1 < op_count:
                 outputs = self.model(outputs)
         plt.subplots_adjust(wspace=0, hspace=0)
 
