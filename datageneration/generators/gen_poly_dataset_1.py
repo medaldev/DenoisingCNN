@@ -10,7 +10,7 @@ class GenPolyDataset(AbstractGenerator):
     def generate_dataset(self, name, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None, verbose=True):
         print("Generating dataset...")
         for i in range(n):
-            generate_example(f"../data/datasets/{name}", 100, 100, 2)
+            generate_example(f"../data/datasets/{name}", width, height, cell_size)
             if verbose and i % 10 == 0:
                 print(f">> {i + 1} / {n}")
 
@@ -26,19 +26,19 @@ def generate_example(save_path, width, height, cell_size, csv=True, txt=True, pn
 
         this_label = str(datetime.now())
         if csv:
-            arrayToCsv(arr, os.path.join(save_path, "csv", "clear", f"{this_label}.csv"))
+            arrayToCsv(arr, os.path.join(save_path, "clear", "csv", f"{this_label}.csv"))
         if txt:
-            array_save(arr, os.path.join(save_path, "txt", "clear", f"{this_label}.xls"))
+            array_save(arr, os.path.join(save_path, "clear", "txt", f"{this_label}.xls"))
 
         if png:
             axes[0].imshow(arr)
 
-        add_noise(arr, 2)
+        add_noise(arr, cell_size)
         # print_matrix(arr)
         if csv:
-            arrayToCsv(arr, os.path.join(save_path, "csv", "noised", f"{this_label}.csv"))
+            arrayToCsv(arr, os.path.join(save_path, "noised", "csv", f"{this_label}.csv"))
         if txt:
-            array_save(arr, os.path.join(save_path, "txt", "noised", f"{this_label}.xls"))
+            array_save(arr, os.path.join(save_path, "noised", "txt", f"{this_label}.xls"))
 
         if png:
             axes[1].imshow(arr)

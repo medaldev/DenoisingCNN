@@ -1,3 +1,4 @@
+import datetime
 import os
 import torch
 
@@ -5,9 +6,10 @@ import common.fstream
 import datageneration.generators
 import models
 from applications import image_denoising
-from common.fstream import create_dir_of_file_if_not_exists
+from common.fstream import (create_dir_of_file_if_not_exists, create_dir_if_not_exists)
 from dataloaders import SimpleLoader2d
-
+from testing.basic_test import basic_test
+from datetime import datetime
 
 class DenoiserEnvironment:
 
@@ -24,17 +26,17 @@ class DenoiserEnvironment:
         self.path_train = os.path.join(path_base, "data", "datasets", name_dataset, "train")
         self.path_test = os.path.join(path_base, "data", "datasets", name_dataset, "val")
 
-        self.path_train_noisy = self.path_train + "/noised"
-        self.path_test_noisy = self.path_test + "/noised"
+        self.path_train_noisy = os.path.join(self.path_train, "noised", "txt")
+        self.path_test_noisy = os.path.join(self.path_test, "noised", "txt")
 
-        self.path_train_normal = self.path_train + "/clear"
-        self.path_test_normal = self.path_test + "/clear"
+        self.path_train_normal = os.path.join(self.path_train, "clear", "txt")
+        self.path_test_normal = os.path.join(self.path_test, "clear", "txt")
 
         self.train_losses, self.test_losses = [], []
         
     def path_save_model(self, model_type):
         return os.path.join(self.path_base, "assets", model_type,
-                     f"{self.name_dataset}_{self.name_model}.{model_type}")
+                     f"{self.name_model}.{model_type}")
 
     def load_model(self, model_type="pt"):
         try:
@@ -72,14 +74,14 @@ class DenoiserEnvironment:
         self.score_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
                                                   read_tensor=read_tensor)
 
-    def generate_data(self, name, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None,
+    def generate_data(self, name, data_goal, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None,
                          verbose=True, generator_class=None):
         if generator_class:
             generator = generator_class()
         else:
             generator = datageneration.generators.get_basic_generator()
 
-        generator.generate_dataset(name, n, width, height, cell_size, csv, txt, png, parameters, verbose)
+        generator.generate_dataset(f"{name}/{data_goal}", n, width, height, cell_size, csv, txt, png, parameters, verbose)
 
     def clear_metrics(self):
         self.train_losses, self.test_losses = [], []
@@ -143,7 +145,7 @@ class DenoiserEnvironment:
 
                 import matplotlib.pyplot as plt
                 fig, axes = plt.subplots(self.batch_size, 3 * op_count, figsize=(18, 8))
-
+                plt.ioff()
                 for j in range(op_count):
                     for k in range(self.batch_size):
                         image_noisy = images_noisy[k].resize(self.width, self.height).tolist()
@@ -163,6 +165,7 @@ class DenoiserEnvironment:
                 if not os.path.exists(os.path.dirname(png_save_path)):
                     os.makedirs(os.path.dirname(png_save_path))
                 fig.savefig(png_save_path)
+                plt.clf()
 
                 i += 1
                 if i >= limit:
@@ -191,25 +194,42 @@ class DenoiserEnvironment:
         if show:
             import matplotlib.pyplot as plt
 
-            plt.hist(scores_before, alpha=0.5, label='x')
-            plt.hist(scores, alpha=0.5, label='y')
+            plt.hist(scores_before, alpha=0.5, label='noise before')
+            plt.hist(scores, alpha=0.5, label='noise after')
             plt.legend(loc='upper right')
             plt.grid()
             plt.show()
 
         return scores_before, scores
 
+    def test_on_dataset(self, csv=True, txt=True, png=True):
+        base_test_path = os.path.join(self.path_base, "runs", "tests", self.name_model,
+                                      f"{self.name_dataset}", str(datetime.now()))
+
+        report_train_path = os.path.join(base_test_path, "train")
+        report_test_val_path = os.path.join(base_test_path, "val")
+
+        create_dir_if_not_exists(report_train_path)
+        create_dir_if_not_exists(report_test_val_path)
+
+        basic_test(self.path_train, self.width, self.height, report_train_path, self.model, self.device, csv, txt, png)
+        basic_test(self.path_test, self.width, self.height, report_test_val_path, self.model, self.device, csv, txt, png)
+
+        print("Testing ended.")
+
 
 if __name__ == '__main__':
-    env = DenoiserEnvironment(name_model="model_5", name_dataset="gcg2", path_base="/home/amedvedev/fprojects/python/denoising")
-    env.load_model(model_type="pt")
-    env.load_data(100, 100, 4, read_tensor=common.fstream.read_tensor)
+    env = DenoiserEnvironment(name_model="gcg2_model_6", name_dataset="gcg4", path_base="/home/amedvedev/fprojects/python/denoising")
+    env.load_model(model_type="pth")
+    env.load_data(100, 100, 2, read_tensor=common.fstream.read_tensor)
+
     #
+    #env.test_on_dataset()
+    #env.train(3)
+    #env.show_metrics()
+    # env.generate_data("gcg3", "val", n=5, width=80, height=80, cell_size=2, csv=True, txt=True, png=True)
     env.score(show=True)
-    # env.train(10)
-    # env.show_metrics()
-    # # env.generate_data("gcg3", n=5, width=80, height=80, cell_size=2, csv=True, txt=True, png=True)
-    # env.score(show=True)
+    env.test_on_dataset()
     #
     # # env.init_model()
     # env.save(pth=True)

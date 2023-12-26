@@ -45,3 +45,7 @@ def arrayToCsv(matrix: np.ndarray, save_path: str, with_rescale_args=True):
 def create_dir_of_file_if_not_exists(path_to_file):
     if not os.path.exists(os.path.dirname(path_to_file)):
         os.makedirs(os.path.dirname(path_to_file))
+
+def create_dir_if_not_exists(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
