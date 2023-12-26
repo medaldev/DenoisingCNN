@@ -41,3 +41,7 @@ def arrayToCsv(matrix: np.ndarray, save_path: str, with_rescale_args=True):
                     print(rescale_val(i, 0, h), rescale_val(j, 0, w), matrix[i][j], file=csv_file, end=", ")
                 else:
                     print(i, j, matrix[i][j], file=csv_file, end=", ")
+
+def create_dir_of_file_if_not_exists(path_to_file):
+    if not os.path.exists(os.path.dirname(path_to_file)):
+        os.makedirs(os.path.dirname(path_to_file))

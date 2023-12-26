@@ -1,9 +1,11 @@
 import os
 import torch
 
+import common.fstream
 import datageneration.generators
 import models
 from applications import image_denoising
+from common.fstream import create_dir_of_file_if_not_exists
 from dataloaders import SimpleLoader2d
 
 
@@ -14,11 +16,9 @@ class DenoiserEnvironment:
         self.name_dataset = name_dataset
         self.path_base = path_base
         self.model = None
-        self.path_save_model = os.path.join(path_base, "DenoisingCNN", "assets", "pt",
-                                            f"{name_dataset}_{name_model}.pt")
         self.device = torch.device(device)
 
-        self.path_save_train_plots = os.path.join(path_base, "DenoisingCNN", "runs", "train_plots", name_dataset,
+        self.path_save_train_plots = os.path.join(path_base, "runs", "train_plots", name_dataset,
                                                   name_model)
 
         self.path_train = os.path.join(path_base, "data", "datasets", name_dataset, "train")
@@ -31,13 +31,18 @@ class DenoiserEnvironment:
         self.path_test_normal = self.path_test + "/clear"
 
         self.train_losses, self.test_losses = [], []
+        
+    def path_save_model(self, model_type):
+        return os.path.join(self.path_base, "assets", model_type,
+                     f"{self.name_dataset}_{self.name_model}.{model_type}")
 
-    def load_model(self):
+    def load_model(self, model_type="pt"):
         try:
-            self.model = torch.load(self.path_save_model).to(self.device)
+            self.model = torch.load(self.path_save_model(model_type)).to(self.device)
+                
         except Exception as e:
             self.init_model()
-            print("Error when loading pretrained model. Use custom.")
+            print("Error when loading pretrained model. Use custom.", e)
 
     def init_model(self, model_class=None):
         if model_class:
@@ -47,6 +52,8 @@ class DenoiserEnvironment:
         print("New model created.")
 
     def load_data(self, width, height, batch_size, read_tensor=None):
+        if read_tensor is None:
+            read_tensor = common.fstream.read_tensor
         self.batch_size = batch_size
         self.width = width
         self.height = height
@@ -90,7 +97,7 @@ class DenoiserEnvironment:
         train_hist = image_denoising.train(self.model, self.train_noisy_loader, self.train_normal_loader,
                                            self.val_noisy_loader,
                                            self.val_normal_loader,
-                                           epochs, self.device, path_save=self.path_save_model, optimizer=optimizer,
+                                           epochs, self.device, path_save=self.path_save_model("pt"), optimizer=optimizer,
                                            criterion=criterion,
                                            callbacks=[self.plot_step_results])
         self.train_losses += train_hist[0]
@@ -102,13 +109,22 @@ class DenoiserEnvironment:
         plt.plot(self.test_losses, label="test_loss", color="orange")
         plt.show()
 
-    def save(self, onnx=False):
-        image_denoising.save_full_model(self.model, self.path_save_model)
+    def save(self, onnx=False, pth=False):
+        image_denoising.save_full_model(self.model, self.path_save_model("pt"))
+
+        if pth:
+            path_save_model_pth = self.path_save_model("pth")
+            inp = torch.randn((1, 1, self.width, self.height), device=self.device)
+            with torch.no_grad():
+                traced_cell = torch.jit.trace(self.model, inp)
+
+            create_dir_of_file_if_not_exists(path_save_model_pth)
+            torch.jit.save(traced_cell, path_save_model_pth)
 
         if onnx:
-            path_save_model_onnx = os.path.join(self.path_base, "DenoisingCNN", "assets", "onnx",
-                                                f"{self.name_dataset}_{self.name_model}.onnx")
+            path_save_model_onnx = self.path_save_model("onnx")
             inp = torch.randn((1, 1, self.width, self.height), device=self.device)
+            create_dir_of_file_if_not_exists(path_save_model_onnx)
             image_denoising.save_onnx_model(self.model, path_save_model_onnx, inp)
 
     def test_plot(self, directory, noisy_loader, normal_loader, prefix, limit, nrow=5, op_count=1):
@@ -132,28 +148,27 @@ class DenoiserEnvironment:
                     for k in range(self.batch_size):
                         image_noisy = images_noisy[k].resize(self.width, self.height).tolist()
                         image_normal = images_normal[k].resize(self.width, self.height).tolist()
-                        image_out = outputs[k].resize(self.width, self.height).detach().numpy()
+                        image_out = outputs[k].resize(self.width, self.height).detach().tolist()
 
                         axes[k, j + 0].imshow(image_noisy)
                         axes[k, j + 1].imshow(image_out)
                         axes[k, j + 2].imshow(image_normal)
 
-                        png_save_path = os.path.join(directory, prefix,
-                                                     f"BATCH_ELEMENT_{k}_{prefix}_res{i}_op_count({j + 1}).png")
-
-                        if not os.path.exists(directory(png_save_path)):
-                            os.makedirs(directory(png_save_path))
-
-                        fig.savefig(png_save_path)
-
                     if op_count > 1:
                         outputs = self.model(outputs)
+
+                png_save_path = os.path.join(directory, prefix,
+                                             f"BATCH_ELEMENT_{prefix}_res{i}.png")
+
+                if not os.path.exists(os.path.dirname(png_save_path)):
+                    os.makedirs(os.path.dirname(png_save_path))
+                fig.savefig(png_save_path)
 
                 i += 1
                 if i >= limit:
                     break
 
-    def score(self, model, show=False):
+    def score(self, show=False):
 
         scores_before = []
         scores = []
@@ -166,7 +181,7 @@ class DenoiserEnvironment:
                 images_normal, __ = data_normal
                 images_normal = images_normal.to(self.device)
 
-                outputs = model(images_noisy)
+                outputs = self.model(images_noisy)
 
                 scores.append(torch.mean(torch.abs(outputs - images_normal)).tolist())
                 scores_before.append(torch.mean(torch.abs(images_noisy - images_normal)).tolist())
@@ -183,3 +198,20 @@ class DenoiserEnvironment:
             plt.show()
 
         return scores_before, scores
+
+
+if __name__ == '__main__':
+    env = DenoiserEnvironment(name_model="model_5", name_dataset="gcg2", path_base="/home/amedvedev/fprojects/python/denoising")
+    env.load_model(model_type="pt")
+    env.load_data(100, 100, 4, read_tensor=common.fstream.read_tensor)
+    #
+    env.score(show=True)
+    # env.train(10)
+    # env.show_metrics()
+    # # env.generate_data("gcg3", n=5, width=80, height=80, cell_size=2, csv=True, txt=True, png=True)
+    # env.score(show=True)
+    #
+    # # env.init_model()
+    # env.save(pth=True)
+
+
