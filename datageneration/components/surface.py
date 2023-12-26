@@ -10,7 +10,7 @@ class Surface:
         self.height = height
         self.width = width
         self.cell_size = cell_size
-
+        self.k0 = 0.0
         self.figures = []
 
     def add_figure(self, figure: Figure):
@@ -25,4 +25,9 @@ class Surface:
                 x = j // self.cell_size
                 for fig in self.figures:
                     matrix[i][j] = max(fig.draw(x, y), matrix[i][j])
+                if matrix[i][j] == 0:
+                    matrix[i][j] = self.k0
         return matrix
+
+    def set_k0(self, k0: float):
+        self.k0 = k0

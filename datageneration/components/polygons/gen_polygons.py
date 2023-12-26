@@ -9,6 +9,7 @@ from datageneration.components.surface import Surface
 
 def gen_data_polygons_1(width: int, height: int, cell_size: int, n_polygons: int):
     surface = Surface(height, width, cell_size)
+    surface.set_k0(0.0)
     x_step, y_step = width // n_polygons, height // n_polygons
     for i in range(n_polygons):
         i_rand, j_rand = random.randint(0, n_polygons - 1), random.randint(0, n_polygons - 1)
