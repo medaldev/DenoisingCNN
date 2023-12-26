@@ -3,10 +3,11 @@ import numpy as np
 import torch
 
 from common.prelude import (read_matrix, rescale_array, arrayToCsv, array_save)
+from common.stream import printProgressBar
 
 
 def basic_test(data_path, width, height, save_path, model, device, csv=True, txt=True, png=True):
-    noised_dir = os.path.join(data_path, "noised", "txt",)
+    noised_dir = os.path.join(data_path, "noised", "txt", )
     clear_dir = os.path.join(data_path, "clear", "txt")
     noised_files = [os.path.join(noised_dir, f) for f in os.listdir(noised_dir) if
                     os.path.isfile(os.path.join(noised_dir, f))]
@@ -15,6 +16,8 @@ def basic_test(data_path, width, height, save_path, model, device, csv=True, txt
     test_dir = os.path.join(save_path, "png")
 
     assert len(clear_files) == len(noised_files)
+
+    print(f"Testing data: {data_path}")
 
     if png:
         import matplotlib.pyplot as plt
@@ -60,4 +63,5 @@ def basic_test(data_path, width, height, save_path, model, device, csv=True, txt
                     os.makedirs(test_dir)
                 fig.savefig(png_data_path)
 
-
+            printProgressBar(i + 1, len(noised_files), prefix='Progress:', suffix='Complete', length=50)
+        print()

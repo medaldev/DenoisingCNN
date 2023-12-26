@@ -4,15 +4,20 @@ from datageneration.components.polygons import gen_data_polygons_1
 from common.fstream import *
 from common.matrix import add_noise
 from datageneration.generators.abstractgenerator import AbstractGenerator
+from common.stream import printProgressBar
 
 
 class GenPolyDataset(AbstractGenerator):
-    def generate_dataset(self, name, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None, verbose=True):
-        print("Generating dataset...")
+    def generate_dataset(self, name, n, width, height, cell_size, csv=True, txt=True, png=True, parameters=None,
+                         verbose=True):
+        print(f"Generating dataset {name}...")
         for i in range(n):
             generate_example(f"../data/datasets/{name}", width, height, cell_size)
-            if verbose and i % 10 == 0:
-                print(f">> {i + 1} / {n}")
+            # if verbose and i % 10 == 0:
+            #     print(f">> {i + 1} / {n}")
+            if verbose:
+                printProgressBar(i + 1, n, prefix='Progress:', suffix='Complete', length=30)
+        print()
 
 
 def generate_example(save_path, width, height, cell_size, csv=True, txt=True, png=True):
