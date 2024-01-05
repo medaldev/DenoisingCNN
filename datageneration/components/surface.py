@@ -6,11 +6,11 @@ from datageneration.components.figure import Figure
 
 
 class Surface:
-    def __init__(self, height: int, width: int, cell_size: int):
+    def __init__(self, height: int, width: int, cell_size: int, k0: float):
         self.height = height
         self.width = width
         self.cell_size = cell_size
-        self.k0 = 0.0
+        self.k0 = k0
         self.figures = []
 
     def add_figure(self, figure: Figure):

@@ -6,7 +6,7 @@ from common.prelude import (read_matrix, rescale_array, arrayToCsv, array_save)
 from common.stream import printProgressBar
 
 
-def basic_test(data_path, width, height, save_path, model, device, csv=True, txt=True, png=True):
+def basic_test(data_path, width, height, save_path, model, device, csv=True, txt=True, png=True, cmap="viridis"):
     noised_dir = os.path.join(data_path, "noised", "txt", )
     clear_dir = os.path.join(data_path, "clear", "txt")
     noised_files = [os.path.join(noised_dir, f) for f in os.listdir(noised_dir) if
@@ -19,9 +19,12 @@ def basic_test(data_path, width, height, save_path, model, device, csv=True, txt
 
     print(f"Testing data: {data_path}")
 
-    if png:
-        import matplotlib.pyplot as plt
-        fig, axes = plt.subplots(1, 3, figsize=(18, 8))
+    #if png:
+
+    import matplotlib.pyplot as plt
+    plt.ioff()
+    plt.tight_layout()
+    fig, axes = plt.subplots(1, 3, figsize=(18, 8))
 
     with open(os.path.join(save_path, "Report.txt"), "w", encoding="utf8") as report_file:
 
@@ -55,13 +58,29 @@ def basic_test(data_path, width, height, save_path, model, device, csv=True, txt
             print(f"{i}) Diff:", np.mean(np.abs(res_neuro_arr - clear_arr)), file=report_file)
 
             if png:
-                axes[0].imshow(noised_arr)
-                axes[1].imshow(res_neuro_arr)
-                axes[2].imshow(clear_arr)
+
+                im1 = axes[0].imshow(noised_arr, cmap=cmap)
+                im2 = axes[1].imshow(res_neuro_arr, cmap=cmap)
+                im3 = axes[2].imshow(clear_arr, cmap=cmap)
+
+                #fig.colorbar(im1, orientation='vertical', ax=axes[0])
+                # fig.colorbar(im2, orientation='vertical')
+                # fig.colorbar(im3, orientation='vertical')
+
+
                 png_data_path = os.path.join(test_dir, f"{new_name}.png")
                 if not os.path.exists(test_dir):
                     os.makedirs(test_dir)
+                cb1 = fig.colorbar(im1, orientation='vertical', fraction=0.046, pad=0.04)
+                cb2 = fig.colorbar(im2, orientation='vertical', fraction=0.046, pad=0.04)
+                cb3 = fig.colorbar(im3, orientation='vertical', fraction=0.046, pad=0.04)
                 fig.savefig(png_data_path)
+                cb1.remove()
+                cb2.remove()
+                cb3.remove()
+                plt.cla()
+
 
             printProgressBar(i + 1, len(noised_files), prefix='Progress:', suffix='Complete', length=50)
         print()
+

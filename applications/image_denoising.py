@@ -163,7 +163,10 @@ def train(model, train_noisy_loader, train_normal_loader, test_noisy_loader, tes
 
 
 def save_full_model(model, path_model):
-    torch.save(model, path_model)
+    traced_script_module = torch.jit.script(model)
+
+    traced_script_module.save(path_model)
+
 
 
 def save_onnx_model(model, path_model, inp):

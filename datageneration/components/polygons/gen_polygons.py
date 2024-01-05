@@ -7,9 +7,9 @@ from datageneration.components.polygons.polygon import Polygon, generate_polygon
 from datageneration.components.surface import Surface
 
 
-def gen_data_polygons_1(width: int, height: int, cell_size: int, n_polygons: int):
-    surface = Surface(height, width, cell_size)
-    surface.set_k0(0.0)
+def gen_data_polygons_1(width: int, height: int, cell_size: int, n_polygons: int, k0: float):
+    surface = Surface(height, width, cell_size, k0)
+    surface.set_k0(k0)
     x_step, y_step = width // n_polygons, height // n_polygons
     for i in range(n_polygons):
         i_rand, j_rand = random.randint(0, n_polygons - 1), random.randint(0, n_polygons - 1)
@@ -22,15 +22,16 @@ def gen_data_polygons_1(width: int, height: int, cell_size: int, n_polygons: int
         renormalize(pair[0], (0., 1.), x_bounds), renormalize(pair[1], (0., 1.), y_bounds))
         points = random_polygon(n_polygons)
         poly_data = list(map(rescale_coords, points))
-        k_value = random.random() * 100
+        k_value = random.uniform(k0 * 1.1, k0 * 1.2)
 
         surface.add_figure(Polygon(poly_data, k=lambda x, y, kv=k_value: kv))
     return surface
 
 
-def gen_data_polygons_2(width: int, height: int, cell_size: int, n_polygons: int, poly_radius: int, k_min=0.7,
+def gen_data_polygons_2(width: int, height: int, cell_size: int, n_polygons: int, poly_radius: int, k0: float, k_min=0.7,
                         k_max=1.5):
-    surface = Surface(height, width, cell_size)
+    surface = Surface(height, width, cell_size, k0)
+
     x_step, y_step = width // n_polygons, height // n_polygons
     for i in range(n_polygons):
         i_rand, j_rand = random.randint(0, n_polygons - 1), random.randint(0, n_polygons - 1)
@@ -47,9 +48,10 @@ def gen_data_polygons_2(width: int, height: int, cell_size: int, n_polygons: int
     return surface
 
 
-def gen_data_polygons_3(width: int, height: int, cell_size: int, n_polygons: int, poly_radius: int, k_min=0.7,
+def gen_data_polygons_3(width: int, height: int, cell_size: int, n_polygons: int, poly_radius: int, k0: float, k_min=0.7,
                         k_max=1.3):
-    surface = Surface(height, width, cell_size)
+    surface = Surface(height, width, cell_size, k0)
+    surface.set_k0(k0)
     x_step, y_step = width // n_polygons, height // n_polygons
     for i in range(n_polygons):
         center = (random.randint(0, width), random.randint(0, height))
@@ -58,6 +60,6 @@ def gen_data_polygons_3(width: int, height: int, cell_size: int, n_polygons: int
                                      irregularity=0.75,
                                      spikiness=0.4,
                                      num_vertices=20)
-        k_value = random.randint(1, 10)
-        surface.add_figure(Polygon(poly_data, k=lambda x, y: k_value))
+        k_value = random.uniform(k0 * 1.1, k0 * 1.2)
+        surface.add_figure(Polygon(poly_data, k=lambda x, y, kv=k_value: kv))
     return surface

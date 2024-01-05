@@ -12,7 +12,9 @@ def read_matrix(path):
     return matrix
 
 
-def read_tensor(path):
+def read_tensor(path, rescale=True):
+    if not rescale:
+        return read_matrix(path)
     with open(path, "r", encoding="utf8") as file_matrix:
         matrix = rescale_array(np.array(list(
             map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n")))))
@@ -26,7 +28,7 @@ def array_save(matrix: np.ndarray, save_path: str):
     with open(save_path, "w", encoding="utf8") as file:
         for i in range(h):
             for j in range(w):
-                print(matrix[i][j], file=file, end=" ")
+                print(matrix[i][j], file=file, end="\t")
             print(file=file)
 
 
