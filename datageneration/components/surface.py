@@ -29,5 +29,17 @@ class Surface:
                     matrix[i][j] = self.k0
         return matrix
 
+    def geometry(self):
+        matrix = np.zeros((self.height, self.width))
+        for i in range(self.height):
+            y = i // self.cell_size
+            for j in range(self.width):
+                x = j // self.cell_size
+                for fig in self.figures:
+                    matrix[i][j] = 1.0
+                if matrix[i][j] == 0:
+                    matrix[i][j] = 0.0
+        return matrix
+
     def set_k0(self, k0: float):
         self.k0 = k0
