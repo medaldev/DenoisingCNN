@@ -3,6 +3,7 @@ from models.autoencoders.ConvAutoencoderLuma import ConvAutoencoderLuma
 from models.autoencoders.ConvAutoencoderLumaRelu import ConvAutoencoderLumaRelu
 from models.autoencoders.ConvAutoencoderLumaRelu2 import ConvAutoencoderLumaRelu2
 from models.autoencoders.ConvAutoencoderLumaRelu3 import ConvAutoencoderLumaRelu3
+from models.autoencoders.ConvAutoencoderLumaRelu4 import ConvAutoencoderLumaRelu4
 
 from .experimental import *
 
