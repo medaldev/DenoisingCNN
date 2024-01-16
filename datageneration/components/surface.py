@@ -36,7 +36,7 @@ class Surface:
             for j in range(self.width):
                 x = j // self.cell_size
                 for fig in self.figures:
-                    matrix[i][j] = 1.0
+                    matrix[i][j] = 1.0 if max(fig.draw(x, y), matrix[i][j]) else 0.0
                 if matrix[i][j] == 0:
                     matrix[i][j] = 0.0
         return matrix

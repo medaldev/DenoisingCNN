@@ -1,6 +1,8 @@
 import random
 from datetime import datetime
 
+import numpy as np
+
 import datageneration.paramsgens
 from datageneration.components.polygons import gen_data_polygons_1, gen_data_polygons_3, gen_data_polygons_2
 from common.fstream import *
@@ -44,7 +46,9 @@ def generate_example(save_path, width, height, cell_size, pct_noise, k0, csv=Tru
             arrayToCsv(geom, os.path.join(save_path, "clear", "csvW", f"{this_label}.csv"))
         if txt:
             array_save(arr, os.path.join(save_path, "clear", "txt", f"{this_label}.xls"))
-            array_save(geom, os.path.join(save_path, "clear", "txtW", f"{this_label}.xls"))
+            array_save(geom, os.path.join(save_path, "clear", "txtW_re", f"{this_label}.xls"))
+            array_save(np.zeros_like(geom), os.path.join(save_path, "clear", "txtW_im", f"{this_label}.xls"))
+            array_save(np.zeros_like(arr), os.path.join(save_path, "clear", "txt_im", f"{this_label}.xls"))
 
         if png:
             im1 = axes[0].imshow(arr, interpolation='none')
