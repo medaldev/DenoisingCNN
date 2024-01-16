@@ -167,6 +167,7 @@ class ConvAutoencoderLumaRelu4(nn.Module):
         x = self.selu(x)
 
         x = self.t_conv14(x)
+        x = self.sigmoid(x)
 
         return x
 
