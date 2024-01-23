@@ -4,6 +4,11 @@ from models.autoencoders.ConvAutoencoderLumaRelu import ConvAutoencoderLumaRelu
 from models.autoencoders.ConvAutoencoderLumaRelu2 import ConvAutoencoderLumaRelu2
 from models.autoencoders.ConvAutoencoderLumaRelu3 import ConvAutoencoderLumaRelu3
 from models.autoencoders.ConvAutoencoderLumaRelu4 import ConvAutoencoderLumaRelu4
+from models.autoencoders.ConvAutoencoderLumaRelu5 import ConvAutoencoderLumaRelu5
+from models.autoencoders.ConvAutoencoderLumaRelu6 import ImageAutoencoder
+from models.autoencoders.ConvAutoencoderLumaRelu7 import ImageAutoencoder2
+
+from models.autoencoders import UnetAutoencoder
 
 from .experimental import *
 

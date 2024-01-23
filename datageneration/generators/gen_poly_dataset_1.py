@@ -32,7 +32,7 @@ class GenPolyDataset(AbstractGenerator):
 
 def generate_example(save_path, width, height, cell_size, pct_noise, k0, csv=True, txt=True, png=True):
     #surface = gen_data_polygons_1(width, height, cell_size, 5, k0)
-    surface = gen_data_polygons_3(width, height, cell_size, random.choice([5, 15, 30]), poly_radius=2, k0=k0)
+    surface = gen_data_polygons_3(width, height, cell_size, random.choice([5, 15, 30]), poly_radius=random.randint(2, 6), k0=k0)
     #surface = gen_data_polygons_2(width, height, cell_size, 10, poly_radius=random.randint(1, 2))
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 2, figsize=(12, 8))

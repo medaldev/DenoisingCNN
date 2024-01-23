@@ -148,7 +148,7 @@ def train(model, train_noisy_loader, train_normal_loader, test_noisy_loader, tes
         print('Epoch: {} \tTraining Loss: {:.6f} \tValidating Loss: {:.6f} \tTime: {:.2f} m'.format(epoch + 1, train_loss, test_loss, (time.time() - start_point) / 60, 2))
 
         if path_save:
-            if len(loss_values) and train_loss < min(loss_values):
+            if len(test_loss_values) and test_loss < min(test_loss_values):
                 save_full_model(model, path_save)
                 print(f"Model saved successfully at {path_save}.")
 
@@ -163,8 +163,11 @@ def train(model, train_noisy_loader, train_normal_loader, test_noisy_loader, tes
 
 
 def save_full_model(model, path_model):
-    traced_script_module = torch.jit.script(model)
 
+    torch.save(model, path_model)
+
+def save_traced_model(model, path_model):
+    traced_script_module = torch.jit.script(model)
     traced_script_module.save(path_model)
 
 

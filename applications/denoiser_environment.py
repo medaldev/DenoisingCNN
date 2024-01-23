@@ -80,6 +80,30 @@ class DenoiserEnvironment:
         self.score_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
                                                   read_tensor=read_tensor_y)
 
+    def load_equal_data(self, width, height, batch_size, read_tensor_x=None, read_tensor_y=None):
+        if read_tensor_x is None:
+            read_tensor_x = common.fstream.read_tensor
+        if read_tensor_y is None:
+            read_tensor_y = common.fstream.read_tensor
+
+        self.batch_size = batch_size
+        self.width = width
+        self.height = height
+        self.train_noisy_loader = SimpleLoader2d(self.path_train_normal, self.device, batch_size, width, height,
+                                                 read_tensor=read_tensor_x)
+        self.train_normal_loader = SimpleLoader2d(self.path_train_normal, self.device, batch_size, width, height,
+                                                  read_tensor=read_tensor_y)
+
+        self.val_noisy_loader = SimpleLoader2d(self.path_test_normal, self.device, batch_size, width, height,
+                                               read_tensor=read_tensor_x)
+        self.val_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, batch_size, width, height,
+                                                read_tensor=read_tensor_y)
+
+        self.score_noisy_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
+                                                 read_tensor=read_tensor_x)
+        self.score_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
+                                                  read_tensor=read_tensor_y)
+
     def generate_data(self, name, data_goal, n, width, height, cell_size, pct_noise=None, k0=None, csv=True, txt=True, png=True, parameters=None,
                       verbose=True, generator_class=None):
         if generator_class:
@@ -127,6 +151,7 @@ class DenoiserEnvironment:
 
     def save(self, onnx=False, pth=False):
         image_denoising.save_full_model(self.model, self.path_save_model("pt"))
+        image_denoising.save_traced_model(self.model, self.path_save_model("pt_traced"))
 
         if pth:
             path_save_model_pth = self.path_save_model("pth")
