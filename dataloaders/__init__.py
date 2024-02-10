@@ -1,4 +1,5 @@
 from .loader2d import SimpleLoader2d
+from .featureloader2d import FeatureLoader2d
 
 import numpy as np
 import matplotlib.pyplot as plt

@@ -11,6 +11,10 @@ def read_matrix(path):
             list(map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n"))))
     return matrix
 
+def read_vector(path):
+    with open(path, "r", encoding="utf8") as file_matrix:
+        arr = file_matrix.read().strip().split()
+    return arr
 
 def read_tensor(path, rescale=True):
     if not rescale:

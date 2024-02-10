@@ -7,7 +7,7 @@ import torch
 import common.fstream
 import datageneration.generators
 import models
-from applications import image_denoising
+from applications import model_manager
 from common.fstream import (create_dir_of_file_if_not_exists, create_dir_if_not_exists)
 from dataloaders import SimpleLoader2d
 from testing.basic_test import basic_test
@@ -29,11 +29,11 @@ class DenoiserEnvironment:
         self.path_train = os.path.join(path_base, "data", "datasets", name_dataset, "train")
         self.path_test = os.path.join(path_base, "data", "datasets", name_dataset, "val")
 
-        self.path_train_noisy = os.path.join(self.path_train, "noised", "txt")
-        self.path_test_noisy = os.path.join(self.path_test, "noised", "txt")
+        self.path_train_noisy = os.path.join(self.path_train, "noised")
+        self.path_test_noisy = os.path.join(self.path_test, "noised")
 
-        self.path_train_normal = os.path.join(self.path_train, "clear", "txt")
-        self.path_test_normal = os.path.join(self.path_test, "clear", "txt")
+        self.path_train_normal = os.path.join(self.path_train, "clear")
+        self.path_test_normal = os.path.join(self.path_test, "clear")
 
         self.train_losses, self.test_losses = [], []
 
@@ -127,7 +127,7 @@ class DenoiserEnvironment:
         print(f"Step results plotted to {self.path_save_train_plots}.")
 
     def train(self, epochs, criterion=None, optimizer=None, step_saving=True, step_plotting=True):
-        train_hist = image_denoising.train(self.model, self.train_noisy_loader, self.train_normal_loader,
+        train_hist = model_manager.train(self.model, self.train_noisy_loader, self.train_normal_loader,
                                            self.val_noisy_loader,
                                            self.val_normal_loader,
                                            epochs, self.device,
@@ -150,8 +150,8 @@ class DenoiserEnvironment:
         plt.show()
 
     def save(self, onnx=False, pth=False):
-        image_denoising.save_full_model(self.model, self.path_save_model("pt"))
-        image_denoising.save_traced_model(self.model, self.path_save_model("pt_traced"))
+        model_manager.save_full_model(self.model, self.path_save_model("pt"))
+        model_manager.save_traced_model(self.model, self.path_save_model("pt_traced"))
 
         if pth:
             path_save_model_pth = self.path_save_model("pth")
@@ -166,7 +166,7 @@ class DenoiserEnvironment:
             path_save_model_onnx = self.path_save_model("onnx")
             inp = torch.randn((1, 1, self.width, self.height), device=self.device)
             create_dir_of_file_if_not_exists(path_save_model_onnx)
-            image_denoising.save_onnx_model(self.model, path_save_model_onnx, inp)
+            model_manager.save_onnx_model(self.model, path_save_model_onnx, inp)
 
     def show_single(self, concrete=None, op_count=1, figsize=(18, 8), cmap="viridis"):
         if concrete is None:

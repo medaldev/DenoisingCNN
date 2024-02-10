@@ -10,35 +10,6 @@ import time
 from common.stream import printProgressBar
 from models import ConvAutoencoder
 
-
-def main():
-    device = 'cpu' #torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-    BATCH_SIZE = 16
-    EPOCHS = 5
-
-    path_base = "/home/amedvedev/fprojects/data/"
-    path_save_model = "../assets/pt/img_denoise.pt"
-    path_dataset = "rain800_idcgan/"
-
-    path_train = os.path.join(path_base, path_dataset, "training")
-    path_test = os.path.join(path_base, path_dataset, "test")
-
-    path_train_rainy = path_train + "_rainy"
-    path_test_rainy = path_test + "_rainy"
-
-    path_train_normal = path_train + "_normal"
-    path_test_normal = path_test + "_normal"
-
-    model = ConvAutoencoder().to(device)
-
-    (train_noisy_loader, train_normal_loader), (val_noisy_loader, val_normal_loader) = get_loaders(
-        path_train_rainy, path_test_rainy, path_train_normal, path_test_normal, BATCH_SIZE, device
-    )
-
-    train(model, train_noisy_loader, train_normal_loader, EPOCHS, device, path_save=path_save_model)
-
-
 def get_transformations():
     transformations = transforms.Compose([
         # transforms.ToPILImage(),
@@ -179,55 +150,9 @@ def save_onnx_model(model, path_model, inp):
                           (inp,),
                           path_model,
                           verbose=True,
-                          input_names=("img",),
-                          output_names=("output",),
+                          # input_names=("img",),
+                          # output_names=("output",),
                           opset_version=14,
                           do_constant_folding=False,
                           export_params=True,
                           dynamic_axes=None)
-
-
-def save_results(model, device, directory, rainy_loader, normal_loader, prefix, limit, nrow=5, op_count=1):
-
-    assert op_count > 0 # кол-во раз обработки изображения моделью
-    torch.set_printoptions(threshold=10000)
-    with torch.no_grad():
-      i = 0
-      for data_noisy, data_normal in zip(rainy_loader, normal_loader):
-            images_noisy, _ = data_noisy
-            images_noisy = images_noisy.to(device)
-
-            images_normal, __ = data_normal
-            images_normal = images_normal.to(device)
-
-            outputs = model(images_noisy)
-
-
-
-            for j in range(op_count):
-                res_cat = torch.cat((images_noisy, outputs, images_normal))
-
-                img = make_grid(res_cat, nrow = nrow) # метод делает сетку из картинок
-                #img = img.numpy().transpose((1, 2, 0)) # транспонируем для отображения в картинке
-
-                if not os.path.exists(directory):
-                  os.makedirs(directory)
-                save_image(img, os.path.join(directory, f"{prefix}_res{i}_op_count({j + 1}).png"))
-
-                with open(os.path.join(directory, f"{prefix}_res{i}_op_count({j + 1}).txt"), "w") as file_write:
-                    print((images_normal - outputs) * 50., file=file_write)
-
-                if op_count > 1:
-                  outputs = model(outputs)
-
-
-            i+= 1
-            if i >= limit:
-              break
-
-
-
-
-
-if __name__ == '__main__':
-    main()
