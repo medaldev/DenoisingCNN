@@ -21,11 +21,6 @@ class FeatureLoader2d(Dataset):
 
         self.read_tensor = read_tensor
 
-        if transform is None:
-            transform = transforms.Compose([
-                transforms.ToTensor(),
-            ])
-
         self.all_files = [os.path.join(data_dir, d, feature) for d in os.listdir(data_dir) if
                           os.path.isfile(os.path.join(data_dir, d, feature))]
         # shuffle(self.all_files)
@@ -60,7 +55,12 @@ class FeatureLoader2d(Dataset):
         content = list(map(self.read_tensor, self.data[idx]))
 
         batch = torch.tensor(np.array(list(map(lambda el: np.array(el),
-                                               content))), dtype=torch.float, device=self.device).resize(
+                                               content))), dtype=torch.float, device=self.device)
+
+        if self.transform:
+            batch = self.transform(batch)
+
+        batch = batch.resize(
             self.batch_size, 1, self.height, self.width)
 
         return batch

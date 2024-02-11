@@ -13,9 +13,9 @@ from . import poly_features
 
 from .experimental import *
 
-import diffusion_models
+import models.diffusion_models
 
-
+from .vqgan_custom import vqgan
 def get_basic_model():
     return ConvAutoencoderLuma()
 

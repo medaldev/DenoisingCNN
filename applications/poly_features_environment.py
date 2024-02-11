@@ -23,12 +23,13 @@ from .abstract_environment import AbstractEnvironment
 
 class PolyFeaturesEnv(AbstractEnvironment):
 
-    def __init__(self, name_model, name_dataset, path_base, device="cuda"):
+    def __init__(self, name_model, name_dataset, path_base, device_name="cuda"):
         self.name_model = name_model
         self.name_dataset = name_dataset
         self.path_base = path_base
         self.model = None
-        self.device = torch.device(device)
+        self.device_name = device_name
+        self.device = torch.device(device_name)
 
         self.path_save_train_plots = os.path.join(path_base, "runs", "train_plots", name_dataset,
                                                   name_model)
@@ -42,22 +43,31 @@ class PolyFeaturesEnv(AbstractEnvironment):
         self.val_target_loader = None
         self.train_target_loader = None
 
-        self.batch_size = None
+        self.train_batch_size = None
+        self.val_batch_size = None
 
         self.train_count = None
         self.val_count = None
 
         self.train_losses, self.test_losses = [], []
 
-    def set_batch_size(self, batch_size):
-        self.batch_size = batch_size
+    def set_batch_size(self, train_batch_size, val_batch_size):
+        self.train_batch_size = train_batch_size
+        self.val_batch_size = val_batch_size
         return self
+
+    def clear_features_and_targets(self):
+        self.train_features_loaders.clear()
+        self.val_features_loaders.clear()
+        self.train_target_loader = None
+        self.val_target_loader = None
+
 
     def load_feature(self, width, height, feature_name, mapper, transform=None):
 
         self.train_features_loaders.append(
             FeatureLoader2d(
-                self.path_train, feature_name, self.device, self.batch_size, width, height, mapper, transform
+                self.path_train, feature_name, self.device, self.train_batch_size, width, height, mapper, transform
             )
         )
 
@@ -66,7 +76,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         self.val_features_loaders.append(
             FeatureLoader2d(
-                self.path_test, feature_name, self.device, self.batch_size, width, height, mapper, transform
+                self.path_test, feature_name, self.device, self.val_batch_size, width, height, mapper, transform
             )
         )
 
@@ -78,7 +88,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
     def set_target(self, width, height, target_name, mapper, transform=None):
         self.train_target_loader = \
             FeatureLoader2d(
-                self.path_train, target_name, self.device, self.batch_size, width, height, mapper, transform
+                self.path_train, target_name, self.device, self.train_batch_size, width, height, mapper, transform
             )
 
         # print(self.train_count, len(self.train_target_loader))
@@ -86,7 +96,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         self.val_target_loader = \
             FeatureLoader2d(
-                self.path_test, target_name, self.device, self.batch_size, width, height, mapper, transform
+                self.path_test, target_name, self.device, self.val_batch_size, width, height, mapper, transform
             )
 
 
@@ -95,16 +105,16 @@ class PolyFeaturesEnv(AbstractEnvironment):
         return self
 
     def plot_batch(self, concrete):
-        fig, axes = plt.subplots(self.batch_size, 2, figsize=(10, self.batch_size * 2))
+        fig, axes = plt.subplots(self.val_batch_size, 2, figsize=(10, self.val_batch_size * 2))
 
         data_features = [fl[concrete] for fl in self.val_features_loaders]
-        data_target = self.val_target_loader[concrete].resize(self.batch_size, self.val_target_loader.width, self.val_target_loader.height).detach().tolist()
+        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, self.val_target_loader.height, self.val_target_loader.width).detach().tolist()
 
         with torch.no_grad():
-            outputs = self.model(*data_features).resize(self.batch_size, self.val_target_loader.width, self.val_target_loader.height).detach().tolist()
+            outputs = self.model(*data_features).resize(self.val_batch_size, self.val_target_loader.height, self.val_target_loader.width).detach().tolist()
 
         images = []
-        for k in range(self.batch_size):
+        for k in range(self.val_batch_size):
 
             images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
             images.append(axes[k, 1].imshow(outputs[k], cmap="jet"))
@@ -114,13 +124,15 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         plt.tight_layout()
 
+        plt.xticks([]), plt.yticks([])
+
         plt.show()
 
         plt.clf()
         matplotlib.pyplot.close()
 
 
-    def train(self, epochs, criterion=None, optimizer=None, step_saving=True, step_plotting=True):
+    def train(self, epochs, criterion=None, optimizer=None, scheduler=None, step_saving=True, step_plotting=True):
 
         # Loss function
         if not criterion:
@@ -182,6 +194,9 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
             self.train_losses.append(train_loss)
             self.test_losses.append(test_loss)
+
+            if scheduler:
+                scheduler.step()
 
 
             print("\n", "=" * 100, "\n", sep="")

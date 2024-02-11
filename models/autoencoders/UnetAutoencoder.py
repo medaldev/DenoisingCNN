@@ -219,19 +219,25 @@ def get_model(string_name):
     return UNetAuto(max_features=features)
 
 if __name__ == "__main__":
-    models = ['unet256', 'unet512', 'unet1024', 'smallu128', 'smallu256', 'smallu512', 'smallu1024']
-    for name in models:
-        model = get_model(name)
-        print(f'Model: {name}')
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-            model.to('cuda')
-        try:
-            from torchsummary import summary
-            summary(model, input_size=(3, 224, 256))
-            print('torchsummary')
-        except:
-            print(model)
-            print('torchsummary failed: pip install torchsummary or bad input')
-        del model
-    print(f"tested {len(models)} model types: {models}")
+    # models = ['unet256', 'unet512', 'unet1024', 'smallu128', 'smallu256', 'smallu512', 'smallu1024']
+    # for name in models:
+    #     model = get_model(name)
+    #     print(f'Model: {name}')
+    #     if torch.cuda.is_available():
+    #         torch.cuda.empty_cache()
+    #         model.to('cuda')
+    #     try:
+    #         from torchsummary import summary
+    #         summary(model, input_size=(3, 224, 256))
+    #         print('torchsummary')
+    #     except:
+    #         print(model)
+    #         print('torchsummary failed: pip install torchsummary or bad input')
+    #     del model
+    # print(f"tested {len(models)} model types: {models}")
+    device = torch.device("cpu")
+    inp = torch.randn((1, 1, 80, 40), device=device)
+    model = UNetAuto(1, 1).to(device)
+    model.eval()
+    out = model(inp)
+    print(out.size())
