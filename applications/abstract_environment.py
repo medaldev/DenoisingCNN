@@ -38,13 +38,15 @@ class AbstractEnvironment:
     def clear_metrics(self):
         self.train_losses, self.test_losses = [], []
 
-    def show_metrics(self, n_last=None):
+    def show_metrics(self, n_last=None, train=True, val=False):
         import matplotlib.pyplot as plt
         plt.close()
         plt.cla()
         plt.clf()
-        plt.plot(self.train_losses if n_last is None else self.train_losses[-n_last:], label="train_loss")
-        plt.plot(self.test_losses if n_last is None else self.test_losses[-n_last:], label="test_loss", color="orange")
+        if train:
+            plt.plot(self.train_losses if n_last is None else self.train_losses[-n_last:], label="train_loss")
+        if val:
+            plt.plot(self.test_losses if n_last is None else self.test_losses[-n_last:], label="test_loss", color="orange")
         plt.legend()
         plt.title("Loss metric")
         plt.show()

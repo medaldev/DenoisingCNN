@@ -104,8 +104,10 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         return self
 
-    def plot_batch(self, concrete):
-        fig, axes = plt.subplots(self.val_batch_size, 2, figsize=(10, self.val_batch_size * 2))
+    def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1):
+        if figsize is None:
+            figsize = (10, self.val_batch_size * 2)
+        fig, axes = plt.subplots(self.val_batch_size, 2, figsize=figsize)
 
         data_features = [fl[concrete] for fl in self.val_features_loaders]
         data_target = self.val_target_loader[concrete].resize(self.val_batch_size, self.val_target_loader.height, self.val_target_loader.width).detach().tolist()
@@ -114,17 +116,24 @@ class PolyFeaturesEnv(AbstractEnvironment):
             outputs = self.model(*data_features).resize(self.val_batch_size, self.val_target_loader.height, self.val_target_loader.width).detach().tolist()
 
         images = []
+
+        axes[0, 0].set_title("Real", pad=20)
+        axes[0, 1].set_title("Pred", pad=20)
         for k in range(self.val_batch_size):
 
             images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
             images.append(axes[k, 1].imshow(outputs[k], cmap="jet"))
 
         for im in images:
-            fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format='%.7f')
+            fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format=format)
 
         plt.tight_layout()
+        fig.subplots_adjust(wspace=wspace, hspace=hspace)
 
-        plt.xticks([]), plt.yticks([])
+        for row in axes:
+            for ax in row:
+                ax.set_xticks([])
+                ax.set_yticks([])
 
         plt.show()
 
