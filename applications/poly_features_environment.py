@@ -132,6 +132,54 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         for row in axes:
             for ax in row:
+                ax.set_ticklabels([])
+                ax.set_ticklabels([])
+
+        plt.show()
+
+        plt.clf()
+        matplotlib.pyplot.close()
+
+    def plot_batch_with_inputs(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1):
+        if figsize is None:
+            figsize = (10, self.val_batch_size * 2)
+        fig, axes = plt.subplots(self.val_batch_size, 2 + len(self.val_features_loaders), figsize=figsize)
+
+        data_features = [fl[concrete] for fl in self.val_features_loaders]
+        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, self.val_target_loader.height,
+                                                              self.val_target_loader.width).detach().tolist()
+
+        with torch.no_grad():
+            outputs = self.model(*data_features).resize(self.val_batch_size, self.val_target_loader.height,
+                                                        self.val_target_loader.width).detach().tolist()
+
+        inputs = [data_features[i].resize(self.val_batch_size, self.val_target_loader.height,
+                                         self.val_target_loader.width).detach().tolist() for i in range(len(self.val_features_loaders))]
+
+        images = []
+
+        axes[0, 0].set_title("Real", pad=20)
+        axes[0, 1].set_title("Pred", pad=20)
+        for i in range(len(self.val_features_loaders)):
+            axes[0, 2 + i].set_title(f"Input {i}", pad=20)
+
+
+        for k in range(self.val_batch_size):
+
+            images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
+            images.append(axes[k, 1].imshow(outputs[k], cmap="jet"))
+
+            for i in range(len(self.val_features_loaders)):
+                images.append(axes[k, 2 + i].imshow(inputs[i][k], cmap="jet"))
+
+        for im in images:
+            fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format=format)
+
+        plt.tight_layout()
+        fig.subplots_adjust(wspace=wspace, hspace=hspace)
+
+        for row in axes:
+            for ax in row:
                 ax.set_xticks([])
                 ax.set_yticks([])
 

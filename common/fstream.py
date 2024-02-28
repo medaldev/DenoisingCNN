@@ -5,10 +5,10 @@ from common.matrix import rescale_array
 from common.value import rescale_val
 
 
-def read_matrix(path):
+def read_matrix(path, coeff_norm=1.0):
     with open(path, "r", encoding="utf8") as file_matrix:
         matrix = np.array(
-            list(map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n"))))
+            list(map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n")))) / coeff_norm
     return matrix
 
 def read_vector(path):
@@ -19,9 +19,7 @@ def read_vector(path):
 def read_tensor(path, rescale=True):
     if not rescale:
         return read_matrix(path)
-    with open(path, "r", encoding="utf8") as file_matrix:
-        matrix = rescale_array(np.array(list(
-            map(lambda row: list(map(lambda el: float(el), row.split())), file_matrix.read().strip().split("\n")))))
+    matrix = rescale_array(read_matrix(path))
     return matrix
 
 
