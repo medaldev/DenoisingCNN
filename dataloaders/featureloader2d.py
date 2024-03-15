@@ -4,8 +4,6 @@ import random
 from torch.utils.data import Dataset
 from torch.nn.init import *
 
-from torchvision import transforms
-
 import numpy as np
 
 from random import shuffle
