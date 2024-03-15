@@ -1,5 +1,4 @@
-from .ConvAutoEncoder import ConvAutoencoder
-from .ConvAutoencoderLuma import ConvAutoencoderLuma
+from . import scaled
 
 from .ConvAutoencoderLumaRelu import ConvAutoencoderLumaRelu
 from .ConvAutoencoderLumaRelu2 import ConvAutoencoderLumaRelu2
@@ -11,17 +10,6 @@ from .ConvAutoencoderLumaRelu7 import ConvAutoencoderLumaRelu7
 from .ConvAutoencoderLumaRelu8 import ConvAutoencoderLumaRelu8
 from .ConvAutoencoderLumaRelu9 import ConvAutoencoderLumaRelu9
 
-
-from .ConvAutoencoderLuma2 import ConvAutoencoderLuma2
-from .ConvAutoencoderLuma3 import ConvAutoencoderLuma3
-from .ConvAutoencoderLuma4 import ConvAutoencoderLuma4
-from .ConvAutoencoderLuma5 import ConvAutoencoderLuma5
-
-from .ConvDenoiser import ConvDenoiser
-from .ConvDenoiser2 import ConvDenoiser2
-
 from .AutoEncoder import Autoencoder
 
 from . import UnetAutoencoder
-
-

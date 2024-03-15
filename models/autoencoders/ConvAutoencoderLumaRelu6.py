@@ -1,11 +1,9 @@
-from torch import nn
-import torch
-
 import torch
 from torchvision import models
 from torchvision.models.feature_extraction import create_feature_extractor
 from torch import nn
 
+from models.reconstructors.reconnet import ReconNet
 
 
 # Create the feature extractor

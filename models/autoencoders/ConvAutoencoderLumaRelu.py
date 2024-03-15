@@ -9,7 +9,6 @@ class ConvAutoencoderLumaRelu(nn.Module):
         self.out_channels = out_channels
         # Encoder
 
-
         self.all_layers = nn.Sequential(
 
             # Encode
@@ -44,11 +43,11 @@ class ConvAutoencoderLumaRelu(nn.Module):
 
 
 import torch
+
 if __name__ == '__main__':
     device = torch.device("cuda:0")
-    model = ConvAutoencoderLumaRelu(64,1).to(device).eval()
+    model = ConvAutoencoderLumaRelu(64, 1).to(device).eval()
     x = torch.randn(4, 64, 30, 30, device=device)
     print(model(x).size())
 
     print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
-
