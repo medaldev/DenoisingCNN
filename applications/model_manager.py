@@ -8,7 +8,6 @@ import os
 import time
 
 from common.stream import printProgressBar
-from models import ConvAutoencoder
 
 def get_transformations():
     transformations = transforms.Compose([
