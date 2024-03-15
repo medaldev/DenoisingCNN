@@ -8,6 +8,9 @@ from models.autoencoders.ConvAutoencoderLumaRelu5 import ConvAutoencoderLumaRelu
 from models.autoencoders.ConvAutoencoderLumaRelu6 import ImageAutoencoder
 from models.autoencoders.ConvAutoencoderLumaRelu7 import ImageAutoencoder2
 
+from . import reconstructors
+from . import predictors
+
 from models.autoencoders import UnetAutoencoder
 from . import poly_features
 

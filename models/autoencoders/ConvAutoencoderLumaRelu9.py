@@ -1,9 +1,9 @@
 from torch import nn
 
 
-class ConvAutoencoderLumaRelu(nn.Module):
+class ConvAutoencoderLumaRelu9(nn.Module):
     def __init__(self, in_channels, out_channels):
-        super(ConvAutoencoderLumaRelu, self).__init__()
+        super(ConvAutoencoderLumaRelu9, self).__init__()
 
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -14,26 +14,30 @@ class ConvAutoencoderLumaRelu(nn.Module):
 
             # Encode
 
+            nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=1, stride=1, padding=0),
+            nn.LeakyReLU(),
             nn.Conv2d(in_channels=in_channels, out_channels=76, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
 
             nn.Conv2d(in_channels=76, out_channels=38, kernel_size=2, stride=1, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(kernel_size=2, stride=1, padding=0),
 
             nn.Conv2d(in_channels=38, out_channels=38, kernel_size=2, stride=1, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.MaxPool2d(kernel_size=2, stride=1, padding=1),
 
             # Decode
 
             nn.ConvTranspose2d(in_channels=38, out_channels=38, kernel_size=2, stride=1, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(in_channels=38, out_channels=76, kernel_size=2, stride=1, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(in_channels=76, out_channels=out_channels, kernel_size=2, stride=1, padding=0),
-            nn.ReLU()
+            nn.LeakyReLU(),
+            nn.ConvTranspose2d(in_channels=out_channels, out_channels=out_channels, kernel_size=1, stride=1, padding=0),
+
 
         )
 
@@ -46,7 +50,7 @@ class ConvAutoencoderLumaRelu(nn.Module):
 import torch
 if __name__ == '__main__':
     device = torch.device("cuda:0")
-    model = ConvAutoencoderLumaRelu(64,1).to(device).eval()
+    model = ConvAutoencoderLumaRelu9(64,1).to(device).eval()
     x = torch.randn(4, 64, 30, 30, device=device)
     print(model(x).size())
 

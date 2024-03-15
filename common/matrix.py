@@ -4,8 +4,10 @@ import random
 import torch
 
 
-def rescale_array(a, to=(0, +1)):
-    return np.interp(a, (a.min(), a.max()), to)
+def rescale_array(a, to=(0, +1), fr_rng=None):
+    if fr_rng is None:
+        fr_rng = (a.min(), a.max())
+    return np.interp(a, fr_rng, to)
 
 
 def rescale_tensor(outmap):
@@ -14,6 +16,17 @@ def rescale_tensor(outmap):
 
     return (outmap - outmap_min) / (outmap_max - outmap_min)  # Broadcasting rules apply
 
+
+def standardize_tensor(tensor):
+    means = tensor.mean(dim=1, keepdim=True)
+    stds = tensor.std(dim=1, keepdim=True)
+    normalized_data = (tensor - means) / stds
+    return normalized_data
+
+def standardize_array(array):
+    array -= np.mean(array)  # the -= means can be read as x = x- np.mean(x)
+    array /= np.std(array)  # the /= means can be read as x = x/np.std(x)
+    return array
 
 def read_tensor_and_norm(path, norm_coeff):
     with open(path, "r", encoding="utf8") as file_matrix:
