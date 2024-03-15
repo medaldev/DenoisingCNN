@@ -11,7 +11,7 @@ import torch.nn.functional as F
 
 # Create the feature extractor
 
-class ImageAutoencoder2(torch.nn.Module):
+class ConvAutoencoderLumaRelu7(torch.nn.Module):
     def __init__(self, final_shape=(30, 30)):
         super().__init__()
 
@@ -84,7 +84,7 @@ class ReconNet(nn.Module):
 
 if __name__ == '__main__':
     device = torch.device("cuda:0")
-    model = ImageAutoencoder2().to(device).eval()
+    model = ConvAutoencoderLumaRelu7().to(device).eval()
     x = torch.randn(1, 1, 30, 30, device=device)
     print(model(x).size())
 

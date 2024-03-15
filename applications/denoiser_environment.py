@@ -49,11 +49,8 @@ class DenoiserEnvironment:
             self.init_model()
             print("Error when loading pretrained model. Use custom.", e)
 
-    def init_model(self, model_class=None):
-        if model_class:
-            self.model = model_class().to(self.device)
-        else:
-            self.model = models.get_basic_model().to(self.device)
+    def init_model(self, model_class):
+        self.model = model_class().to(self.device)
         print("New model created.")
 
     def load_data(self, width, height, batch_size, read_tensor_x=None, read_tensor_y=None):

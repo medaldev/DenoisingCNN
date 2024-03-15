@@ -10,7 +10,7 @@ from torch import nn
 
 # Create the feature extractor
 
-class ImageAutoencoder(torch.nn.Module):
+class ConvAutoencoderLumaRelu6(torch.nn.Module):
     def __init__(self, final_shape=(30, 30)):
         super().__init__()
 
@@ -41,7 +41,7 @@ class ImageAutoencoder(torch.nn.Module):
 
 if __name__ == '__main__':
     device = torch.device("cuda:0")
-    model = ImageAutoencoder().to(device).eval()
+    model = ConvAutoencoderLumaRelu6().to(device).eval()
     x = torch.randn(1, 1, 30, 30, device=device)
     print(model(x).size())
 

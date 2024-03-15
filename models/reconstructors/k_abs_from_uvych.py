@@ -40,7 +40,7 @@ class K_abs_Uvych_k0_v1(nn.Module):
         return x
 
 
-def test():
+if __name__ == '__main__':
     device = torch.device("cpu:0")
     model = K_abs_Uvych_k0_v1(3200, 800).to(device).eval()
     x1 = torch.randn(1, 1, 3200, device=device)
@@ -51,4 +51,3 @@ def test():
     print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 
-test()
