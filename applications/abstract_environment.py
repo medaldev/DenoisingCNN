@@ -21,12 +21,12 @@ class AbstractEnvironment:
                             f"{self.name_model}.{model_type}")
 
     def load_model(self, model_type="pt"):
-        try:
+        if model_type=="pt":
             self.model = torch.load(self.path_save_model(model_type)).to(self.device)
+        elif model_type=="pt_traced":
+            self.model = torch.jit.load(self.path_save_model("pt")).to(self.device)
+        raise Exception
 
-        except Exception as e:
-            self.init_model()
-            print("Error when loading pretrained model. Use custom.", e)
 
     def init_model(self, model_class):
         self.model = model_class().to(self.device)
@@ -48,9 +48,11 @@ class AbstractEnvironment:
         plt.title("Loss metric")
         plt.show()
 
-    def save(self, onnx=False, pth=False):
+    def save(self, onnx=False, pth=False, jit=False):
         model_manager.save_full_model(self.model, self.path_save_model("pt"))
-        model_manager.save_traced_model(self.model, self.path_save_model("pt_traced"))
+
+        if jit:
+            model_manager.save_traced_model(self.model, self.path_save_model("pt_traced"))
 
         if pth:
             path_save_model_pth = self.path_save_model("pth")

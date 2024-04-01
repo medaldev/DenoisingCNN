@@ -1,15 +1,14 @@
 from . import scaled
 
-from .ConvAutoencoderLumaRelu import ConvAutoencoderLumaRelu
-from .ConvAutoencoderLumaRelu2 import ConvAutoencoderLumaRelu2
-from .ConvAutoencoderLumaRelu3 import ConvAutoencoderLumaRelu3
-from .ConvAutoencoderLumaRelu4 import ConvAutoencoderLumaRelu4
-from .ConvAutoencoderLumaRelu5 import ConvAutoencoderLumaRelu5
-from .ConvAutoencoderLumaRelu6 import ConvAutoencoderLumaRelu6
-from .ConvAutoencoderLumaRelu7 import ConvAutoencoderLumaRelu7
-from .ConvAutoencoderLumaRelu8 import ConvAutoencoderLumaRelu8
-from .ConvAutoencoderLumaRelu9 import ConvAutoencoderLumaRelu9
+from . import purecnns
 
 from .AutoEncoder import Autoencoder
 
 from . import UnetAutoencoder
+
+from . import swin_unet
+from . import unet
+from . import residual
+
+from . import res_unet
+from . import wavelet

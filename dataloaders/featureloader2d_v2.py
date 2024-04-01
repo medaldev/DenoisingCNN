@@ -1,6 +1,7 @@
 import os
 import random
 
+import torchvision.io
 from torch.utils.data import Dataset
 from torch.nn.init import *
 
@@ -11,6 +12,8 @@ import numpy as np
 from random import shuffle
 from common.stream import printProgressBar
 
+
+torchvision.io.ImageReadMode
 import time
 
 

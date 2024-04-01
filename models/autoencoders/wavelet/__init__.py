@@ -1,0 +1,1 @@
+from .mwdcnn import WMDCNN

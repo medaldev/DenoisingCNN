@@ -4,3 +4,5 @@ from . import predictors
 from . import gans
 from . import diffusion
 from . import experimental
+from . import embeddings
+from . import losses

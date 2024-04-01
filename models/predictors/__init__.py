@@ -1,2 +1,4 @@
 from .PredictRealMaxMin import PredictRealMaxMin
 from .PredictRealMaxMin2 import PredictRealMaxMinv2
+from .NoiseMatrixPredictor_v1 import NoiseMatrixPredictor_v1
+from .NoiseMatrixPredictor_v2 import NoiseMatrixPredictor_v2

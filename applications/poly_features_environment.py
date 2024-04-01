@@ -3,6 +3,7 @@ import os
 import random
 import matplotlib
 import matplotlib.pyplot as plt
+import numpy as np
 import torch
 
 import common.fstream
@@ -109,23 +110,25 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
     def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1):
         if figsize is None:
-            figsize = (10, self.val_batch_size * 2)
-        fig, axes = plt.subplots(self.val_batch_size, 2, figsize=figsize)
+            figsize = (10, self.val_batch_size * 3)
+        fig, axes = plt.subplots(self.val_batch_size, 3, figsize=figsize)
 
         data_features = [fl[concrete] for fl in self.val_features_loaders]
-        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, *self.val_target_loader.shape[1:]).detach().tolist()
+        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, *self.val_target_loader.shape[1:]).cpu().detach().numpy()
 
         with torch.no_grad():
-            outputs = self.model(*data_features).resize(self.val_batch_size, *self.val_target_loader.shape[1:]).detach().tolist()
+            outputs = self.model(*data_features).resize(self.val_batch_size, *self.val_target_loader.shape[1:]).cpu().detach().numpy()
 
         images = []
 
         axes[0, 0].set_title("Real", pad=20)
         axes[0, 1].set_title("Pred", pad=20)
+        axes[0, 2].set_title("Diff", pad=20)
         for k in range(self.val_batch_size):
 
             images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
             images.append(axes[k, 1].imshow(outputs[k], cmap="jet"))
+            images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k]), cmap="jet"))
 
         for im in images:
             fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format=format)
@@ -149,12 +152,14 @@ class PolyFeaturesEnv(AbstractEnvironment):
         fig, axes = plt.subplots(self.val_batch_size, 2 + len(self.val_features_loaders), figsize=figsize)
 
         data_features = [fl[concrete] for fl in self.val_features_loaders]
-        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, *self.val_target_loader.shape).detach().tolist()
+        data_target = self.val_target_loader[concrete].resize(self.val_batch_size,
+                                                              *self.val_target_loader.shape[1:]).detach().tolist()
 
         with torch.no_grad():
-            outputs = self.model(*data_features).resize(self.val_batch_size, *self.val_target_loader.shape).detach().tolist()
+            outputs = self.model(*data_features).resize(self.val_batch_size,
+                                                        *self.val_target_loader.shape[1:]).detach().tolist()
 
-        inputs = [data_features[i].resize(self.val_batch_size, *self.val_features_loaders[i].shape,
+        inputs = [data_features[i].resize(self.val_batch_size, *self.val_features_loaders[i].shape[1:],
                                         ).detach().tolist() for i in range(len(self.val_features_loaders))]
 
         images = []
@@ -243,7 +248,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
                                      length=50)
                 print()
 
-            print('Epoch: {} \tTraining Loss: {:.6f} \tValidating Loss: {:.6f} \tTime: {:.2f} m'.
+            print('Epoch: {} \tTraining Loss: {:.9f} \tValidating Loss: {:.9f} \tTime: {:.2f} m'.
                   format(epoch + 1, train_loss,test_loss, (time.time() - start_point) / 60,2))
 
             if step_saving:
