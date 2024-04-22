@@ -1,30 +1,31 @@
 from torch import nn
 import torch
 
-class ConvAutoencoderLumaRelu5(nn.Module):
-    def __init__(self, in_channels, out_channels, n_convs=10, n_linears=1):
-        super(ConvAutoencoderLumaRelu5, self).__init__()
+class ConvAutoencoderLumaRelu12(nn.Module):
+    def __init__(self, convs_ch=None, linears_ch=None):
+        super(ConvAutoencoderLumaRelu12, self).__init__()
+
+        if linears_ch is None:
+            linears_ch = []
+        if convs_ch is None:
+            convs_ch = [1, 1]
 
         self.convs = []
         self.tconvs = []
-        self.convs.append(
-            nn.Conv2d(in_channels=in_channels, out_channels=2 ** (0 + 3), kernel_size=2, stride=2, padding=0))
 
-        self.n = n_convs
-        for i in range(n_convs):
-            self.convs.append(nn.Conv2d(in_channels=min(2**(i + 3), 2 ** 11), out_channels=min(2**(i + 4), 2 ** 11),
+
+        n_convs = len(convs_ch)
+
+        for i in range(len(convs_ch) - 1):
+            self.convs.append(nn.Conv2d(in_channels=convs_ch[i], out_channels=convs_ch[i + 1],
                                         kernel_size=4, stride=1, padding=0))
 
-            j = n_convs - i - 1
-            self.tconvs.append(nn.ConvTranspose2d(in_channels=min(2 ** (j + 4), 2 ** 11), out_channels=min(2 ** (j + 3), 2 ** 11),
+            self.tconvs.append(nn.ConvTranspose2d(in_channels=convs_ch[n_convs - i - 1], out_channels=convs_ch[n_convs - i - 2],
                                         kernel_size=4, stride=1, padding=0))
-        self.tconvs.append(
-            nn.ConvTranspose2d(in_channels=min(2 ** (j + 3), 2 ** 11), out_channels=out_channels, kernel_size=2, stride=2, padding=0))
-
 
         self.linears = []
-        for i in range(n_linears):
-            self.linears.append(nn.Linear(8192, 8192))
+        for i in range(len(linears_ch) - 1):
+            self.linears.append(nn.Linear(linears_ch[i], linears_ch[i + 1]))
 
         self.convs = nn.ModuleList(self.convs)
         self.tconvs = nn.ModuleList(self.tconvs)
@@ -51,6 +52,7 @@ class ConvAutoencoderLumaRelu5(nn.Module):
             x = self.linears[i](x)
             x = self.lrelu(x)
 
+        print(x.size())
         x = x.view(bs, 2048, 2, 2)
 
         for i in range(len(self.tconvs)):
@@ -63,7 +65,7 @@ class ConvAutoencoderLumaRelu5(nn.Module):
 
 if __name__ == '__main__':
     device = torch.device("cpu:0")
-    model = ConvAutoencoderLumaRelu5(2, 1, 10, 4).to(device).eval()
+    model = ConvAutoencoderLumaRelu12([1,4, 8, 32], [8092, 8092]).to(device).eval()
     x = torch.randn(1, 2, 64, 64, device=device)
     print(model(x).size())
 

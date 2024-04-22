@@ -328,6 +328,7 @@ class WMDCNN(nn.Module):
 
 if __name__ == '__main__':
     device = torch.device("cpu:0")
-    model = WMDCNN(1, 4, 4, 28).to(device).eval()
-    x = torch.randn(16, 1, 80, 80, device=device)
+    model = WMDCNN(2, 4, 4, 28).to(device).eval()
+    x = torch.randn(16, 2, 80, 80, device=device)
+    print(model(x).size())
     print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
