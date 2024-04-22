@@ -19,7 +19,7 @@ import time
 
 class FeatureLoader2d(Dataset):
 
-    def __init__(self, data_dir, feature, device, batch_size, shape, read_tensor, transform=None, lazy_load=False, pct_load=None, dtype=None):
+    def __init__(self, data_dir, feature, device, batch_size, shape, read_tensor, transform=None, lazy_load=False, pct_load=None, dtype=None, ignore_not_exists=False):
 
         if dtype is None:
             dtype = torch.float
@@ -30,7 +30,7 @@ class FeatureLoader2d(Dataset):
 
         self.read_tensor = read_tensor
 
-        self.all_files = [os.path.join(data_dir, d, feature) for d in os.listdir(data_dir) if
+        self.all_files = [os.path.join(data_dir, d, feature) for d in os.listdir(data_dir) if ignore_not_exists or
                           os.path.isfile(os.path.join(data_dir, d, feature))]
         if pct_load:
             self.all_files = self.all_files[:int(len(self.all_files) * pct_load)]

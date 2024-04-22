@@ -67,11 +67,11 @@ class PolyFeaturesEnv(AbstractEnvironment):
         self.val_target_loader = None
 
 
-    def load_feature(self, shape, feature_name, mapper, transform=None, lazy_load=False, pct_load=None, dtype=None):
+    def load_feature(self, shape, feature_name, mapper, transform=None, lazy_load=False, pct_load=None, dtype=None, ignore_not_exists=False):
 
         self.train_features_loaders.append(
             FeatureLoader2d(
-                self.path_train, feature_name, self.device, self.train_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype
+                self.path_train, feature_name, self.device, self.train_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype, ignore_not_exists
             )
         )
 
@@ -80,7 +80,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         self.val_features_loaders.append(
             FeatureLoader2d(
-                self.path_test, feature_name, self.device, self.val_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype
+                self.path_test, feature_name, self.device, self.val_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype, ignore_not_exists
             )
         )
 
@@ -89,10 +89,10 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         return self
 
-    def set_target(self, shape, target_name, mapper, transform=None, lazy_load=False, pct_load=None, dtype=None):
+    def set_target(self, shape, target_name, mapper, transform=None, lazy_load=False, pct_load=None, dtype=None, ignore_not_exists=False):
         self.train_target_loader = \
             FeatureLoader2d(
-                self.path_train, target_name, self.device, self.train_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype
+                self.path_train, target_name, self.device, self.train_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype, ignore_not_exists
             )
 
         # print(self.train_count, len(self.train_target_loader))
@@ -100,7 +100,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         self.val_target_loader = \
             FeatureLoader2d(
-                self.path_test, target_name, self.device, self.val_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype
+                self.path_test, target_name, self.device, self.val_batch_size, shape, mapper, transform, lazy_load, pct_load, dtype, ignore_not_exists
             )
 
 
@@ -108,7 +108,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         return self
 
-    def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1):
+    def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1, ch_show=None):
         if figsize is None:
             figsize = (10, self.val_batch_size * 3)
         fig, axes = plt.subplots(self.val_batch_size, 3, figsize=figsize)
@@ -126,9 +126,12 @@ class PolyFeaturesEnv(AbstractEnvironment):
         axes[0, 2].set_title("Diff", pad=20)
         for k in range(self.val_batch_size):
 
-            images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
-            images.append(axes[k, 1].imshow(outputs[k], cmap="jet"))
-            images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k]), cmap="jet"))
+            images.append(axes[k, 0].imshow(data_target[k][ch_show] if ch_show else data_target[k], cmap="jet"))
+            images.append(axes[k, 1].imshow(outputs[k][ch_show] if ch_show else outputs[k], cmap="jet"))
+            if ch_show:
+                images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k])[ch_show], cmap="jet"))
+            else:
+                images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k]), cmap="jet"))
 
         for im in images:
             fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format=format)

@@ -8,3 +8,4 @@ from .ConvAutoencoderLumaRelu7 import ConvAutoencoderLumaRelu7
 from .ConvAutoencoderLumaRelu8 import ConvAutoencoderLumaRelu8
 from .ConvAutoencoderLumaRelu9 import ConvAutoencoderLumaRelu9
 from .ConvAutoencoderLumaRelu10 import ConvAutoencoderLumaRelu10
+from .ConvAutoencoderLumaRelu11 import ConvAutoencoderLumaRelu11
