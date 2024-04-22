@@ -25,7 +25,8 @@ class AbstractEnvironment:
             self.model = torch.load(self.path_save_model(model_type)).to(self.device)
         elif model_type=="pt_traced":
             self.model = torch.jit.load(self.path_save_model("pt")).to(self.device)
-        raise Exception
+        else:
+            raise Exception
 
 
     def init_model(self, model_class):

@@ -1,4 +1,5 @@
 import datetime
+import gc
 import os
 import random
 import matplotlib
@@ -108,16 +109,21 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
         return self
 
-    def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1, ch_show=None):
+    def plot_batch(self, concrete, figsize=None, format='%.7f', wspace=0.3, hspace=0.1, size=None, func_postprocess=None):
+        if func_postprocess is None:
+            func_postprocess = lambda x: x
+
+        if size is None:
+            size = self.val_target_loader.shape[1:]
         if figsize is None:
             figsize = (10, self.val_batch_size * 3)
         fig, axes = plt.subplots(self.val_batch_size, 3, figsize=figsize)
 
         data_features = [fl[concrete] for fl in self.val_features_loaders]
-        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, *self.val_target_loader.shape[1:]).cpu().detach().numpy()
+        data_target = self.val_target_loader[concrete].resize(self.val_batch_size, *size).cpu().detach().numpy()
 
         with torch.no_grad():
-            outputs = self.model(*data_features).resize(self.val_batch_size, *self.val_target_loader.shape[1:]).cpu().detach().numpy()
+            outputs = self.model(*data_features).resize(self.val_batch_size, *size).cpu().detach().numpy()
 
         images = []
 
@@ -126,12 +132,12 @@ class PolyFeaturesEnv(AbstractEnvironment):
         axes[0, 2].set_title("Diff", pad=20)
         for k in range(self.val_batch_size):
 
-            images.append(axes[k, 0].imshow(data_target[k][ch_show] if ch_show else data_target[k], cmap="jet"))
-            images.append(axes[k, 1].imshow(outputs[k][ch_show] if ch_show else outputs[k], cmap="jet"))
-            if ch_show:
-                images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k])[ch_show], cmap="jet"))
-            else:
-                images.append(axes[k, 2].imshow(np.abs(outputs[k] - data_target[k]), cmap="jet"))
+            images.append(axes[k, 0].imshow(func_postprocess(data_target[k]), cmap="jet"))
+            images.append(axes[k, 1].imshow(func_postprocess(outputs[k]), cmap="jet"))
+            images.append(axes[k, 2].imshow(np.abs(func_postprocess(outputs[k]) - func_postprocess(data_target[k])), cmap="jet"))
+
+            print(data_target[k])
+            print(outputs[k])
 
         for im in images:
             fig.colorbar(im, orientation='vertical', fraction=0.046, pad=0.04, format=format)
@@ -269,6 +275,7 @@ class PolyFeaturesEnv(AbstractEnvironment):
 
 
             print("\n", "=" * 100, "\n", sep="")
+            gc.collect()
 
 
 
