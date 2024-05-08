@@ -178,7 +178,6 @@ class PolyFeaturesEnv(AbstractEnvironment):
         for i in range(len(self.val_features_loaders)):
             axes[0, 2 + i].set_title(f"Input {i}", pad=20)
 
-
         for k in range(self.val_batch_size):
 
             images.append(axes[k, 0].imshow(data_target[k], cmap="jet"))
