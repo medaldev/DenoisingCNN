@@ -16,29 +16,19 @@ class Encoder(nn.Module):
 
             for i in range(1, len(channels))
         ])
-        self.flatten = nn.Flatten()
-        self.linears = nn.ModuleList([
-            nn.Linear(1000, 512),
-            nn.Linear(512, 5),
-        ])
 
     def forward(self, x):
+        x = torch.fft.fftn(x, dim=(-3, -2, -1))
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i < len(self.layers) - 1:
                 x = complex_relu(x)
-        print("lc", x.size())
-        x = self.flatten(x)
-        for i, layer in enumerate(self.linears):
-            x = layer(x)
-            if i < len(self.linears) - 1:
-                x = complex_relu(x)
-        x = torch.abs(x)
+        x = torch.fft.ifftn(x, dim=(-3, -2, -1))
         return x
 
 
 def load(path):
-    re_im = np.fromfile(path,  dtype=np.double)
+    re_im = np.fromfile(path, dtype=np.double)
     x = np.vectorize(complex)(re_im[::2], re_im[1::2])
     return x
 
@@ -46,13 +36,13 @@ def load(path):
 if __name__ == '__main__':
     k_uvych = 16
     device = torch.device("cpu")
-    dtype = torch.cdouble
+    dtype = torch.complex64
     model = Encoder(channels=[3, 32, 64, 128, 256, 512, 512, 256, 128, 64, 32, 1],
                     kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)).to(device, dtype=dtype)
     model.eval()
 
-    x = torch.randn(5, 3, 10, 10, 10, device=device, dtype=dtype)
-    #x = torch.from_numpy(load("D:\\projects\\cpp\\gcggen\\data\\examples\\0\\K").reshape(1, 1, 16, 16, 16)).to(device, dtype)
+    # x = torch.randn(5, 3, 10, 10, 10, device=device, dtype=dtype)
+    x = torch.from_numpy(load("D:/projects/gcggenE/InverseProblemE/DATA/tasks/5/Evych").reshape(1, 3, 10, 10, 10)).to(device, dtype)
 
     with torch.no_grad():
         r = model(x)
