@@ -6,3 +6,4 @@ from . import diffusion
 from . import experimental
 from . import embeddings
 from . import losses
+from .d3 import *

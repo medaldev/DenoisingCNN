@@ -4,3 +4,4 @@ from .ConvAEres_v3 import AEv3_0
 from .ConvAEres_v4 import AEv4_0
 from .ConvAEres_v5 import AEv5_0
 from .ConvAEres_v6 import AEv6_0
+from .ConvAEres_v8 import AEv8
