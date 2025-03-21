@@ -17,13 +17,14 @@ class Encoder(nn.Module):
             for i in range(1, len(channels))
         ])
 
+
     def forward(self, x):
-        x = torch.fft.fftn(x, dim=(-3, -2, -1))
+        # x = torch.fft.fftn(x, dim=(-3, -2, -1))
         for i, layer in enumerate(self.layers):
             x = layer(x)
             if i < len(self.layers) - 1:
                 x = complex_relu(x)
-        x = torch.fft.ifftn(x, dim=(-3, -2, -1))
+        # x = torch.fft.ifftn(x, dim=(-3, -2, -1))
         return x
 
 
@@ -37,8 +38,8 @@ if __name__ == '__main__':
     k_uvych = 16
     device = torch.device("cpu")
     dtype = torch.complex64
-    model = Encoder(channels=[3, 32, 64, 128, 256, 512, 512, 256, 128, 64, 32, 1],
-                    kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1)).to(device, dtype=dtype)
+    model = Encoder(channels=[3, 32, 64, 128, 64, 32, 3],
+                    kernel_size=(2, 2, 2), stride=(1, 1, 1), padding=(0, 0, 0)).to(device, dtype=dtype)
     model.eval()
 
     # x = torch.randn(5, 3, 10, 10, 10, device=device, dtype=dtype)
