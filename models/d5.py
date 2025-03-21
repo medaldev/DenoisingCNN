@@ -31,7 +31,7 @@ class FilterBlock(nn.Module):
 
 
 class DenoiserBlock(nn.Module):
-    def __init__(self, in_channels, num_par_filters):
+    def __init__(self, in_channels, num_par_filters, out_channels):
         super(DenoiserBlock, self).__init__()
         self.num_par_filters = num_par_filters
         ch_data = [in_channels, 32, 128, 32, 3]
@@ -40,7 +40,7 @@ class DenoiserBlock(nn.Module):
                         use_fft=(i % 2) == 0)
             for i in range(num_par_filters)
         ])
-        self.reducer = FilterBlock(channels=[in_channels * num_par_filters, 32, 128, 32, in_channels],
+        self.reducer = FilterBlock(channels=[3 * num_par_filters, 32, 128, 32, out_channels],
                                    kernel_size=(3, 3, 3), stride=(1, 1, 1), padding=(1, 1, 1))
 
     def forward(self, x):
@@ -49,6 +49,7 @@ class DenoiserBlock(nn.Module):
         regrouped_tensor = stacked.transpose(0, 1)
         regr_size = list(regrouped_tensor.size())
         regrouped_tensor = regrouped_tensor.resize(regr_size[0], regr_size[1] * regr_size[2], *regr_size[3:])
+        print(regrouped_tensor.size())
         reduced_tensor = self.reducer(regrouped_tensor)
         return reduced_tensor
 
@@ -60,7 +61,7 @@ class DenoiserModel(nn.Module):
         self.blocks = []
         for i in range(num_denoiser_blocks):
             self.blocks.append(
-                DenoiserBlock(in_channels, num_par_filters)
+                DenoiserBlock(in_channels, num_par_filters, 3 if i + 1 == num_denoiser_blocks else in_channels)
             )
         self.blocks = nn.ModuleList(self.blocks)
 
@@ -80,10 +81,11 @@ if __name__ == '__main__':
     k_uvych = 16
     device = torch.device("cpu")
     dtype = torch.complex64
-    model = DenoiserModel(in_channels=3, num_par_filters=5, num_denoiser_blocks=2).to(device, dtype=dtype)
+    #model = DenoiserModel(in_channels=90, num_par_filters=5, num_denoiser_blocks=2).to(device, dtype=dtype)
+    model = nn.(kernel_size=3).to(device, dtype=dtype)
     model.eval()
 
-    x = torch.randn(6, 3, 10, 10, 10, device=device, dtype=dtype)
+    x = torch.randn(6, 90, 10, 10, 10, device=device, dtype=dtype)
     # x = torch.from_numpy(load("D:/projects/gcggenE/InverseProblemE/DATA/tasks/5/Evych").reshape(1, 3, 10, 10, 10)).to(
     #     device, dtype)
 
