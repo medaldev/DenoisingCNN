@@ -47,6 +47,7 @@ class AbstractEnvironment:
             plt.plot(self.test_losses if n_last is None else self.test_losses[-n_last:], label="test_loss", color="orange")
         plt.legend()
         plt.title("Loss metric")
+        plt.savefig("loss.png")
         plt.show()
 
     def save(self, onnx=False, pth=False, jit=False):
