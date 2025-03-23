@@ -6,7 +6,7 @@ from torch import nn
 
 from pathlib import Path
 
-PATH_BASE = str(Path(os.path.realpath(__file__)).parent.absolute())
+PATH_BASE = str(Path(os.path.realpath(__file__)).parent.parent.absolute())
 
 print("PATH_BASE", PATH_BASE)
 
@@ -83,14 +83,14 @@ def test(env):
                 errors.append(error.detach().tolist())
 
     # logger.info("Начальное среднее отклонение по значениям:", sum(losses_dataset) / len(losses_dataset))
-    logger.info("Текущее среднее отклонение по значениям:", sum(losses) / len(losses))
+    logger.info(f"Текущее среднее отклонение по значениям: {sum(losses) / len(losses)}")
 
     # logger.info("Начальное максимальное отклонение по значениям:", max(losses_dataset))
-    logger.info("Текущее максимальное отклонение по значениям в векторе:", max(losses))
+    logger.info(f"Текущее максимальное отклонение по значениям в векторе: {max(losses)}")
 
     # logger.info()
     # logger.info("Начальная средняя относительная ошибка:", sum(init_errors) / len(init_errors))
-    logger.info("Текущая средняя относительная ошибка:", sum(errors) / len(errors))
+    logger.info(f"Текущая средняя относительная ошибка: {sum(errors) / len(errors)}")
     # logger.info()
     # logger.info("Начальная максимальная относительная ошибка:", max(init_errors))
     # logger.info("Текущая максимальная относительная ошибка:", max(errors))
@@ -127,10 +127,12 @@ def main(
         shape=(3, 10, 10, 10), target_name="Evych", mapper=load, transform=None, dtype=dtype
     )
 
-    logger.debug(env.train_count, env.val_count)
+    logger.debug(f"Train/Val selections counts: {env.train_count}, {env.val_count}")
 
+    print(load_from_pretrain)
     if load_from_pretrain:
         env.model = torch.load(env.path_save_model("pt"), map_location=env.device).to(env.device)
+        print("Model loaded from pretrained")
     else:
         env.model = DenoiserModel(in_channels=3 * count_evych, num_par_filters=num_par_filters,
                                   num_denoiser_blocks=num_denoiser_blocks).to(env.device, dtype=dtype)
@@ -163,11 +165,11 @@ if __name__ == "__main__":
     parser.add_argument("--pct_noise", type=float, required=True)
     parser.add_argument("--epochs", type=int, required=True, help="Number of epochs to train the model.")
     parser.add_argument("--model_name", type=str, required=True, help="Name of the model to use.")
-    parser.add_argument("--load_from_pretrain", type=bool, required=True,
+    parser.add_argument("--load_from_pretrain", type=bool, required=False, default=False,
                         help="Whether to load from a pretrained model (True/False).")
     parser.add_argument("--train_batch_size", type=int, required=True)
     parser.add_argument("--val_batch_size", type=int, required=True)
-    parser.add_argument("--learning_rate", type=int, required=True)
+    parser.add_argument("--learning_rate", type=float, required=True)
     parser.add_argument("--num_par_filters", type=int, required=True)
     parser.add_argument("--num_denoiser_blocks", type=int, required=True)
     parser.add_argument("--device", type=str, required=True)

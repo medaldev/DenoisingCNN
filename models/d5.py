@@ -82,15 +82,15 @@ if __name__ == '__main__':
     device = torch.device("cpu")
     dtype = torch.complex64
     #model = DenoiserModel(in_channels=90, num_par_filters=5, num_denoiser_blocks=2).to(device, dtype=dtype)
-    model = nn.(kernel_size=3).to(device, dtype=dtype)
-    model.eval()
+    # model = nn.(kernel_size=3).to(device, dtype=dtype)
+    # model.eval()
 
-    x = torch.randn(6, 90, 10, 10, 10, device=device, dtype=dtype)
+    # x = torch.randn(6, 90, 10, 10, 10, device=device, dtype=dtype)
     # x = torch.from_numpy(load("D:/projects/gcggenE/InverseProblemE/DATA/tasks/5/Evych").reshape(1, 3, 10, 10, 10)).to(
     #     device, dtype)
 
-    with torch.no_grad():
-        r = model(x)
-        print(r.size())
-
-    print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
+    # with torch.no_grad():
+    #     r = model(x)
+    #     print(r.size())
+    #
+    # print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
