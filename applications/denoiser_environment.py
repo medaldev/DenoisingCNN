@@ -5,8 +5,7 @@ import random
 import torch
 
 import common.fstream
-import datageneration.generators
-import models
+
 from applications import model_manager
 from common.fstream import (create_dir_of_file_if_not_exists, create_dir_if_not_exists)
 from dataloaders import SimpleLoader2d
@@ -101,15 +100,6 @@ class DenoiserEnvironment:
         self.score_normal_loader = SimpleLoader2d(self.path_test_normal, self.device, 1, width, height,
                                                   read_tensor=read_tensor_y)
 
-    def generate_data(self, name, data_goal, n, width, height, cell_size, pct_noise=None, k0=None, csv=True, txt=True, png=True, parameters=None,
-                      verbose=True, generator_class=None):
-        if generator_class:
-            generator = generator_class()
-        else:
-            generator = datageneration.generators.get_basic_generator()
-
-        generator.generate_dataset(f"{name}/{data_goal}", n, width, height, cell_size, pct_noise, k0, csv, txt, png, parameters,
-                                   verbose)
 
     def clear_metrics(self):
         self.train_losses, self.test_losses = [], []
