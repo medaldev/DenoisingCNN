@@ -41,8 +41,8 @@ def get_few_noised(path, pct, k):
     return np.vstack([get_noised(path, pct) for _ in range(k)])
 
 
-def get_mean_noised(path, pct, k):
-    return np.mean([get_noised(path, pct) for _ in range(k)], axis=0)
+def get_mean_noised(path, k):
+    return sum([get_noised(path) for _ in range(k)]) / k
 
 
 def my_loss(output, target, alpha=1.0, beta=1.0, gamma=1.0, delta=1.0):
@@ -100,7 +100,7 @@ def main(
         name_dataset, count_evych, pct_noise, epochs,
         model_name, load_from_pretrain,
         train_batch_size, val_batch_size,
-        learning_rate=None,
+        learning_rate,
         num_par_filters=None,
         num_denoiser_blocks=None,
         device="cpu"

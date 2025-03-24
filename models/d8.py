@@ -1,6 +1,7 @@
 import numpy as np
 import torch
 from torch import nn
+from torch.nn.functional import batch_norm
 
 
 def complex_relu(z):
@@ -13,13 +14,13 @@ class FilterBlock(nn.Module):
         self.use_fft = use_fft
 
         # Define convolutional layers with batch normalization
-        # self.bn1 = nn.BatchNorm3d(16)
-        # self.bn2 = nn.BatchNorm3d(32)
-        # self.bn3 = nn.BatchNorm3d(64)
-        # self.bn4 = nn.BatchNorm3d(64)
-        # self.bn5 = nn.BatchNorm3d(64)
-        # self.bn7 = nn.BatchNorm3d(16)
-        # self.bn6 = nn.BatchNorm3d(32)
+        self.bn1 = nn.BatchNorm3d(16)
+        self.bn2 = nn.BatchNorm3d(32)
+        self.bn3 = nn.BatchNorm3d(64)
+        self.bn4 = nn.BatchNorm3d(64)
+        self.bn5 = nn.BatchNorm3d(64)
+        self.bn7 = nn.BatchNorm3d(16)
+        self.bn6 = nn.BatchNorm3d(32)
         self.conv1 = nn.Conv3d(in_channels, 16, kernel_size=3, stride=1, padding=1)
         self.conv2 = nn.Conv3d(16, 32, kernel_size=3, stride=1, padding=1)
         self.conv3 = nn.Conv3d(32, 64, kernel_size=3, stride=1, padding=1)
@@ -36,6 +37,8 @@ class FilterBlock(nn.Module):
         # Apply layers with residual connections
         x1_res = self.conv1(x)
         x1 = complex_relu(x1_res)
+
+        x1 = torch.complex(real=batch_norm(x1.real), imag=self.bn1(x1.imag))
 
         x2_res = self.conv2(x1)
         x2 = complex_relu(x2_res)
@@ -101,17 +104,19 @@ class DenoiserModel(nn.Module):
 
 
 if __name__ == '__main__':
-    from torchview import draw_graph
-
     k_uvych = 16
     device = torch.device("cpu")
     dtype = torch.complex64
     # model = DenoiserModel(in_channels=90, num_par_filters=5, num_denoiser_blocks=2).to(device, dtype=dtype)
-    model = FilterBlock(in_channels=30, out_channels=3).to(device, dtype=dtype)
+    model = FilterBlock(in_channels=90, out_channels=3).to(device, dtype=dtype)
     model.eval()
 
-    x = torch.randn(1, 30, 10, 10, 10, device=device, dtype=dtype)
-    # device='meta' -> no memory is consumed for visualization
-    model_graph = draw_graph(model, input_data=x, device='meta', hide_inner_tensors=False,
-    hide_module_functions=False,)
-    model_graph.visual_graph.view()
+    x = torch.randn(6, 90, 10, 10, 10, device=device, dtype=dtype)
+    # x = torch.from_numpy(load("D:/projects/gcggenE/InverseProblemE/DATA/tasks/5/Evych").reshape(1, 3, 10, 10, 10)).to(
+    #     device, dtype)
+
+    with torch.no_grad():
+        r = model(x)
+        print(r.size())
+
+    print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
