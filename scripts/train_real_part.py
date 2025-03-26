@@ -131,7 +131,7 @@ def main(
 
     print(load_from_pretrain)
     if load_from_pretrain:
-        env.model = torch.load(env.path_save_model("pt"), map_location=env.device, weights_only=True).to(env.device)
+        env.model = torch.load(env.path_save_model("pt"), map_location=env.device, weights_only=False).to(env.device)
         print("Model loaded from pretrained")
     else:
         env.model = DenoiserModel(in_channels=3 * count_evych, num_par_filters=num_par_filters,
@@ -146,6 +146,7 @@ def main(
     opt = torch.optim.Adam(env.model.parameters(), lr=learning_rate)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, patience=4)
 
+    test(env)
     env.train(epochs, step_saving=True, step_plotting=False,
               optimizer=opt, scheduler=None,
               criterion=my_loss,

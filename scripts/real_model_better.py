@@ -8,9 +8,10 @@ import torch.nn as nn
 
 
 class FilterBlockResidual(nn.Module):
-    def __init__(self, in_channels, out_channels, use_fft: bool = False):
+    def __init__(self, in_channels, out_channels, use_fft: bool = False, residual: bool = True):
         super(FilterBlockResidual, self).__init__()
         self.use_fft = use_fft
+        self.residual = residual
 
         # Define convolutional layers with batch normalization
         self.bn1 = nn.LayerNorm([16, 10, 10, 10])
@@ -47,13 +48,19 @@ class FilterBlockResidual(nn.Module):
         x4 = torch.relu(self.bn4(x4_res))
 
         x5_res = self.conv5(x4)
-        x5 = torch.relu(self.bn5(x5_res)) + x3_res
+        x5 = torch.relu(self.bn5(x5_res))
+        if self.residual:
+            x5 += x3_res
 
         x6_res = self.conv6(x5)
-        x6 = torch.relu(self.bn6(x6_res)) + x2_res
+        x6 = torch.relu(self.bn6(x6_res))
+        if self.residual:
+            x6 += x2_res
 
         x7_res = self.conv7(x6)
-        x7 = torch.relu(self.bn7(x7_res)) + x1_res
+        x7 = torch.relu(self.bn7(x7_res))
+        if self.residual:
+            x7 += x1_res
 
         x8 = self.conv8(x7)
 
@@ -118,5 +125,10 @@ if __name__ == '__main__':
     #
     # print("params", sum(p.numel() for p in model.parameters() if p.requires_grad))
 
+    from torchviz import make_dot
+
+    x = torch.randn(6, 90, 10, 10, 10, device=device, dtype=dtype)
+    r = model(x)
+    make_dot(r, params=dict(list(model.named_parameters()))).render("model", format="png")
 
 
